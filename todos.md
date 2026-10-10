@@ -37,7 +37,7 @@ test.
 **Current implementation:** React landing page and taste-test entry are
 available. Email/password and Google sign-in use Supabase, with server
 verification in the Python API. SQLAlchemy models and Alembic migrations
-support saved aesthetics. Live Supabase configuration and browser checks
+support saved aesthetics, questionnaire drafts, and image metadata. Live auth checks
 remain necessary before marking authentication as verified end-to-end.
 
 ## Phase 2 --- Authentication and user account
@@ -55,26 +55,62 @@ remain necessary before marking authentication as verified end-to-end.
 **Implementation available:** Supabase email sign-up/sign-in, Google OAuth,
 sign-out, session refresh, protected taste-test APIs, and user/taste models
 are implemented. Configure the Supabase project, apply migrations, and
-verify real email/Google flows. Dashboard, collections, account settings,
-and uploaded-image deletion remain pending.
+verify real email/Google flows. The full Style DNA dashboard, collections, and
+account settings remain pending; onboarding image deletion is implemented
+in Phase 3.
 
 **Done when:** A user can return later and find their own saved data.
 
 ## Phase 3 --- Taste test and inspiration upload
 
-**Outcome:** Muselly learns initial preferences from choices and images.
+**Outcome:** Muselly collects initial preferences and private inspirations.
 
--   [ ] Build a multi-step visual taste test with outfit/style choices.
--   [ ] Collect preferred colors, fits, aesthetics, occasions, and
+-   [x] Build a multi-step visual taste test with outfit/style choices.
+-   [x] Collect preferred colors, fits, aesthetics, occasions, and
     dislikes.
 -   [ ] Allow users to upload multiple outfit images and screenshots.
--   [ ] Show image previews, remove/retry, upload progress, and error
+    Implemented and tested with mocked Storage; live acceptance requires the
+    secret/service_role key rather than the currently configured anon key.
+-   [x] Show image previews, remove/retry, upload progress, and error
     states.
 -   [ ] Save taste-test answers and inspiration images to the account.
--   [ ] Allow skipping optional questions and editing answers later.
+    Draft persistence and image metadata are implemented. Migration is applied;
+    live image persistence awaits the correct backend storage credential.
+-   [x] Allow skipping optional questions and editing answers later.
 
-**Done when:** A new user can finish onboarding using the test, uploads,
-or both.
+**Done when:** A new user completes all required answers and uploads 5–10
+inspiration images successfully, then returns to the saved placeholder.
+
+**Implemented:** Twenty questions across five stages, including optional Q20
+current city/region and country. Reusable image choices, swatches, chips, tags,
+Other fields, maximum selections, exclusive dislikes, a coalescing background
+save queue, immediate Back/Continue/Skip, and saved completed-state editing. Images support multi-file
+browse/drop, byte progress, private authenticated previews, retry, removal,
+and atomic replacement. Backend validation checks image contents, size, pixels,
+and required answers. Completion confirms 5–10 durable storage objects.
+The dashboard route is explicitly a “Style DNA is coming next” placeholder.
+No Gemini, Qloo, analysis, recommendations, or final Style DNA is implemented.
+
+**Verification (2026-10-10):** React interaction tests include the complete
+20-question flow. Backend tests cover temporary migrated databases, mocked
+Supabase Auth/Storage, validation, completion, and user isolation. Production
+build passes. Chromium checks cover 375, 768, 1024, and 1440px for question,
+destination, aesthetic, silhouette, occasion, and upload layouts, plus keyboard
+selection, five-image upload/completion, and signed-out redirects. Browser API
+responses are mocked; this does not certify live uploads. Screenshots and
+checks are in ignored `test-results/taste/`.
+
+**Live setup:** `0002_taste_test` is applied to the configured Supabase project.
+Read-only verification confirms the private bucket, 10 MB object limit, RLS on
+both new tables, no browser storage policies, and no authenticated Data API
+SELECT grants. A live round-trip attempt confirmed that the supplied storage
+credential is an anon/public JWT; private upload correctly failed. Isolated
+test database records were removed. Set `SUPABASE_SECRET_KEY` in `backend/.env`
+to the dashboard secret key (`sb_secret_...`), or set `SUPABASE_SERVICE_ROLE_KEY`
+to the legacy **service_role** key. Restart Python and verify live upload/read/
+replace/delete/completion before ticking the two remaining items.
+
+See [implementation/setup notes](docs/TASTE_TEST.md).
 
 ## Phase 4 --- AI taste analysis and Qloo enrichment
 
@@ -208,8 +244,10 @@ retailer page and see a clear difference.
     only to their owner.
 -   [ ] Secure API keys on the backend; never ship Qloo or LLM secrets
     in frontend/extension code.
--   [ ] Add upload limits, image validation, consent messaging, and
+-   [x] Add upload limits, image validation, consent messaging, and
     deletion controls.
+    Verified through frontend/backend tests; live Storage acceptance remains
+    tracked under Phase 3.
 -   [ ] Test responsive layouts, keyboard accessibility, broken links,
     and slow API responses.
 -   [ ] Deploy website/backend and package the extension for demo.
@@ -243,6 +281,8 @@ tracking
 
 ## Next action
 
-**Configure Supabase and verify Phase 2 sign-in and saved taste selections.**
-Then continue the remaining Phase 3 test and upload features; do not build all retailer integrations or advanced
-agent workflows before a single end-to-end shopping path works.
+**Configure the backend secret/service_role key and verify live private
+inspiration uploads.** The five-stage questionnaire and upload implementation
+are ready; finish Phase 3 live acceptance before starting the separate analysis
+phase. Gemini, Qloo, recommendations, and the final Style DNA dashboard remain
+out of scope for this implementation.

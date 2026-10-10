@@ -5,15 +5,9 @@ import StylePreview from './components/StylePreview';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import SignIn from './components/SignIn';
 import AuthCallback from './components/AuthCallback';
-import { apiRequest } from './lib/supabase';
+import TasteTest from './components/TasteTest';
 
 const links = [['How it works', 'how-it-works'], ['For you', 'for-you'], ['Extension', 'extension'], ['FAQs', 'faqs']];
-const tasteChoices = [
-  { id: 'romantic', title: 'Soft & romantic', subtitle: 'Flowing shapes, delicate details', image: 'romantic-dress', alt: 'Brown flowing dress with soft cream sleeves' },
-  { id: 'classic', title: 'Modern classic', subtitle: 'Clean lines, timeless layers', image: 'modern-classic', alt: 'Burgundy leather jacket with black tailored trousers' },
-  { id: 'casual', title: 'Relaxed & effortless', subtitle: 'Easy denim, cozy layers', image: 'soft-casual', alt: 'Soft blue cardigan with relaxed wide-leg denim' },
-  { id: 'chic', title: 'A little bold', subtitle: 'Statement shapes, city energy', image: 'city-chic', alt: 'Black fitted top, brown mini skirt, and tall boots' },
-];
 
 function Navigation() {
   const [open, setOpen] = useState(false);
@@ -57,11 +51,11 @@ function Extension() {
 
 const faqs = [
   ['What is Muselly?', 'Muselly is a personal fashion discovery companion. We’re building a way to turn your visual inspirations and preferences into an editable Style DNA, then use it to find pieces that feel like you.'],
-  ['How does the taste test work?', 'Sign in with email or Google, then choose the outfit aesthetics you’re drawn to. The full taste test will explore your colors, fits, occasions, and dislikes, with optional inspiration uploads. There are no right or wrong answers.'],
+  ['How does the taste test work?', 'Sign in with email or Google, then choose the outfit aesthetics you’re drawn to. The taste test explores your lifestyle, colors, fits, occasions, and dislikes, followed by 5–10 inspiration images. There are no right or wrong answers.'],
   ['Can I use my Pinterest inspirations?', 'Manual uploads and saving individual images through the extension are planned. Connecting a Pinterest account or board is a future enhancement and isn’t available yet.'],
   ['Which shopping sites will Muselly support?', 'We plan to start with one or two reliable product sources, then expand. The retailer names shown here are planned integrations, not a promise of live catalogs. Extension features will also depend on site-specific support.'],
   ['Is the Chrome extension available?', 'Not yet. The extension is coming soon. It will share your Muselly profile and help you save inspirations, find similar pieces, and evaluate products on supported pages.'],
-  ['What happens to my taste-test answers?', 'Your selected aesthetics are saved to your signed-in account when you continue. You can return to the taste test to edit them. Image uploads and AI Style DNA are still being built.'],
+  ['What happens to my taste-test answers?', 'Your answers and inspiration images are privately saved to your signed-in account. You can return to the taste test to edit them. Style analysis is coming later.'],
 ];
 
 function FAQs() {
@@ -80,57 +74,17 @@ function EntryHeader() {
   return <header className="entry-header container"><Brand /><a className="back-link" href="/"><ArrowLeft size={16} /> Back to Muselly</a></header>;
 }
 
-function TasteTest() {
-  const [selected, setSelected] = useState([]);
-  const [complete, setComplete] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [revision, setRevision] = useState(0);
-  const [loadFailed, setLoadFailed] = useState(false);
-  useEffect(() => {
-    document.title = 'Your taste test — Muselly';
-    const controller = new AbortController();
-    setLoading(true);
-    setLoadFailed(false);
-    setError('');
-    apiRequest('/api/taste-test', { signal: controller.signal })
-      .then(data => { if (!controller.signal.aborted) setSelected(data.selected_styles); })
-      .catch(failure => {
-        if (!controller.signal.aborted) {
-          setError(failure.message || 'Unable to load your taste test. Please try again.');
-          setLoadFailed(true);
-        }
-      })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
-  }, [revision]);
-  async function saveChoices() {
-    setSaving(true);
-    setError('');
-    try {
-      await apiRequest('/api/taste-test', { method: 'PUT', body: { selected_styles: selected } });
-      setComplete(true);
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    } catch (failure) { setError(failure.message || 'Unable to save your choices. Please try again.'); }
-    finally { setSaving(false); }
-  }
-  if (loading || loadFailed) return <><EntryHeader /><main id="main-content" className="taste-page container"><p role="status">{loading ? 'Loading your taste test…' : error}</p>{loadFailed && <div className="entry-actions"><Button onClick={() => setRevision(value => value + 1)}>Try again</Button><Button href="/sign-in" variant="secondary">Return to your account</Button></div>}</main></>;
-  const toggle = id => setSelected(items => items.includes(id) ? items.filter(item => item !== id) : [...items, id]);
-  return <><EntryHeader /><main id="main-content" className="taste-page container"><Eyebrow icon>Your style story starts here</Eyebrow>{complete ? <div className="taste-result"><span className="result-icon"><Check size={26} /></span><h1>A little glimpse of <em>you.</em></h1><p>You’re drawn to {selected.map(id => tasteChoices.find(choice => choice.id === id).title.toLowerCase()).join(' and ')}. This is just a starting point — your taste can be more than one thing.</p><div className="result-images">{tasteChoices.filter(choice => selected.includes(choice.id)).map(choice => <img key={choice.id} src={`/images/${choice.image}.png`} alt={choice.alt} />)}</div><Card className="entry-notice"><Sparkles size={20} /><div><strong>Your taste is saved.</strong><p>You can return and edit these choices anytime. Inspiration uploads and AI Style DNA are still being built.</p></div></Card><div className="entry-actions"><Button onClick={() => setComplete(false)} variant="secondary"><ArrowLeft size={16} /> Edit my choices</Button><Button href="/">Explore Muselly <ArrowRight size={17} /></Button></div></div> : <><div className="taste-title"><span className="step-pill">Taste-test preview</span><h1>Which looks feel like <em>you?</em></h1><p>Go with your first instinct. Choose one, or a few — your style doesn’t have to fit in a box.</p></div><fieldset className="taste-options" disabled={saving}><legend className="sr-only">Choose the styles you’re drawn to</legend>{tasteChoices.map(choice => <label className={`taste-choice ${selected.includes(choice.id) ? 'taste-choice--selected' : ''}`} key={choice.id}><input type="checkbox" checked={selected.includes(choice.id)} onChange={() => toggle(choice.id)} /><div className="taste-choice__photo"><img src={`/images/${choice.image}.png`} alt={choice.alt} /><span className="choice-check" aria-hidden="true">{selected.includes(choice.id) ? <Check size={18} /> : <Plus size={18} />}</span></div><div className="taste-choice__label"><h2>{choice.title}</h2><p>{choice.subtitle}</p></div></label>)}</fieldset><div className="taste-bottom"><div><p className="selection-status" role="status">{selected.length ? `${selected.length} ${selected.length === 1 ? 'look' : 'looks'} selected` : 'Choose at least one look to continue'}</p><span>Your choices are saved to your account when you continue.</span></div><Button disabled={!selected.length || saving} onClick={saveChoices}>{saving ? 'Saving…' : 'Continue'} <ArrowRight size={18} /></Button></div>{error && <p className="taste-error" role="alert">{error}</p>}</>}</main><footer className="entry-footer">Your taste is personal. There’s no wrong answer.</footer></>;
-}
-
 function TasteTestGate() {
   const { status, user, error, retry } = useAuth();
   useEffect(() => {
     if (['signed-out', 'unconfigured'].includes(status)) window.location.replace('/sign-in');
   }, [status]);
-  if (status === 'signed-in' && user) return <TasteTest key={user.id} />;
+  if (status === 'signed-in' && user) return <TasteTest key={user.id} header={<EntryHeader />} />;
   return <><EntryHeader /><main id="main-content" className="taste-page container"><p role="status">{status === 'error' ? error : 'Checking your sign-in…'}</p>{status === 'error' && <div className="entry-actions"><Button onClick={retry}>Try again</Button><Button href="/sign-in" variant="secondary">Go to sign in</Button></div>}</main></>;
 }
 
 export default function App() {
   const path = window.location.pathname.replace(/\/$/, '') || '/';
-  return <AuthProvider><a className="skip-link" href="#main-content">Skip to content</a>{path === '/' ? <Landing /> : path === '/taste-test' ? <TasteTestGate /> : path === '/sign-in' ? <SignIn header={<EntryHeader />} /> : path === '/auth/callback' ? <AuthCallback header={<EntryHeader />} /> : <><EntryHeader /><main id="main-content" className="not-found container"><h1>This page is still on the moodboard.</h1><Button href="/">Back to Muselly <ArrowRight size={18} /></Button></main></>}</AuthProvider>;
+  return <AuthProvider><a className="skip-link" href="#main-content">Skip to content</a>{path === '/' ? <Landing /> : (path === '/taste-test' || path === '/dashboard') ? <TasteTestGate /> : path === '/sign-in' ? <SignIn header={<EntryHeader />} /> : path === '/auth/callback' ? <AuthCallback header={<EntryHeader />} /> : <><EntryHeader /><main id="main-content" className="not-found container"><h1>This page is still on the moodboard.</h1><Button href="/">Back to Muselly <ArrowRight size={18} /></Button></main></>}</AuthProvider>;
 }
 

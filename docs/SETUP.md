@@ -5,8 +5,8 @@
 The project's [Supabase dashboard](https://supabase.com/dashboard/project/kvlyrfrbyqfqjwsniaqf)
 already exists. Its API URL is `https://kvlyrfrbyqfqjwsniaqf.supabase.co`.
 The local `frontend/.env` and `backend/.env` are configured and ignored by
-Git; credentials are not included in this guide. Alembic revision
-`0001_profiles` has been applied to this project’s PostgreSQL database.
+Git; credentials are not included in this guide. Alembic revisions
+`0001_profiles` and `0002_taste_test` have been applied to this project’s PostgreSQL database.
 
 Open [Authentication providers](https://supabase.com/dashboard/project/kvlyrfrbyqfqjwsniaqf/auth/providers)
 to configure Email and Google. Set the Site URL to
@@ -93,6 +93,7 @@ SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
 DATABASE_URL=postgresql+psycopg://YOUR_DB_USER:YOUR_ENCODED_PASSWORD@YOUR_DB_HOST:5432/postgres?sslmode=require
 APP_ORIGIN=http://localhost:5173
+SUPABASE_SECRET_KEY=YOUR_BACKEND_ONLY_SECRET_KEY
 ```
 
 Use the **Direct connection** or **Session pooler** connection from
@@ -122,7 +123,24 @@ uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Alembic creates the application profile/taste tables and secures their
-Data API access. Do not create or migrate Supabase-managed auth tables.
+Data API access. Revision `0002_taste_test` adds questionnaire drafts and
+inspiration image metadata, and creates `muselly-inspirations` as a private
+Supabase Storage bucket (10 MB per object; JPEG, PNG, WebP). It does not alter
+Supabase authentication tables. The existing profile/aesthetic data is retained.
+
+Set `SUPABASE_SECRET_KEY` in **backend/.env only** to the secret key
+(`sb_secret_...`) from Supabase Project Settings → API keys. A legacy
+service_role JWT can instead be supplied as `SUPABASE_SERVICE_ROLE_KEY`. Upload, read, and
+delete operations use this backend credential after checking the signed-in
+user's ownership. Keep the bucket private and do not add browser access
+policies. This follows Supabase's [private bucket access model](https://supabase.com/docs/guides/storage/buckets/fundamentals).
+No additional frontend variables are required. Restart Python after changing
+its environment. Without the key, questionnaire saving works but uploads show
+a recoverable storage-configuration error.
+
+For a PostgreSQL installation without the Supabase Storage schema, the migration
+creates only application tables. Create the private bucket in your Supabase
+Storage project before using uploads.
 
 From `frontend/`, in another terminal:
 
@@ -152,9 +170,18 @@ in Supabase and `APP_ORIGIN`.
    needed. If Supabase returns a session immediately at registration, the
    app also opens the taste test automatically.
 3. Existing users who sign in with email can select **Start taste test**.
-4. Select one or more aesthetics and choose **Continue** to save them.
-5. Sign out, sign back in, and check that your saved selections return.
-6. Open `/taste-test` while signed out: it must return to `/sign-in`.
+4. Complete the five stages. Optional age, size, location, and cultural
+   inspiration questions can be skipped. Other answers reveal a text field;
+   the aesthetic and shopping-personality questions allow at most three choices.
+5. Refresh during the quiz after “Progress saved” and check that the answers
+   and current question return. Back must preserve choices.
+6. Add 5–10 valid images. Test retry, replacement, removal, invalid files,
+   oversized files, and the ten-image cap. Fewer than five must block finishing.
+7. Finish and check the saved `/dashboard` placeholder. Revisit `/taste-test`
+   to edit; existing answers and images must return. No analysis runs.
+8. Sign out and test `/taste-test` and `/dashboard`: both must return to
+   `/sign-in`. With two accounts, verify that neither can fetch, replace, or
+   remove the other's image IDs through the API.
 
 Run `uv run pytest` in `backend/`, and `npm test` plus `npm run build`
 in `frontend/` for local checks. Supabase credentials are not needed for the automated tests.

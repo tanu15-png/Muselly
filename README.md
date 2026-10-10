@@ -71,23 +71,39 @@ The Python API independently checks access tokens with Supabase before
 returning or saving any taste-test data. Passwords and Google credentials
 are managed by Supabase, not application tables or a local account file.
 
-SQLAlchemy models `UserProfile` and `TasteProfile` store application
-profile details and selected aesthetics in PostgreSQL. **Continue** saves
-answers through the authenticated API; returning users can revisit and
-edit their selections. The application uses the verified Supabase user
-ID for every database query. It does not generate an AI Style DNA yet.
+The taste test has five guided stages and twenty questions, including optional
+current city/region and country. Choices, custom Other answers, names, and
+location autosave through `/api/onboarding`; Back/Continue also save the
+current position. Completed users see a saved-state placeholder at `/dashboard`
+and can edit their answers without starting over. There is no style analysis yet.
 
-Alembic migration `0001_profiles` creates only `muselly_user_profiles`
-and `muselly_taste_profiles`. It enables row-level security and revokes
-browser Data API access to these tables. The Python API accesses them
-through its private database connection. Supabase's `auth.users` schema
-is not modified. User profile IDs mirror Supabase user IDs; account
-removal should also remove the matching application profile.
+The final stage requires **5–10 inspiration images** (JPG/JPEG, PNG, WebP;
+10 MB per file). It supports browsing, drag-and-drop, progress, retry, removal,
+and replacement. FastAPI verifies image contents with Pillow and strips
+embedded metadata before storing them in a private Supabase Storage bucket.
+Image downloads go through authenticated, owner-scoped API endpoints; temporary
+browser preview URLs are never stored as image references.
+
+Alembic `0002_taste_test` adds `muselly_taste_tests` and
+`muselly_inspiration_images`, with RLS enabled and browser Data API access
+revoked. It also creates the private `muselly-inspirations` bucket in Supabase.
+The existing profile tables and legacy aesthetics endpoint remain intact.
+All application queries use the verified Supabase user ID. Supabase's
+`auth.users` schema is not modified.
+
+**Upload setup:** add `SUPABASE_SECRET_KEY` to `backend/.env` only,
+then restart the backend. Use the secret key (`sb_secret_...`) from your project's API key settings.
+The legacy `SUPABASE_SERVICE_ROLE_KEY` is also supported. Never put it in a `VITE_` variable. No frontend
+environment changes are needed. Run `uv sync` and `uv run alembic upgrade head`
+from `backend/`. See [setup](docs/SETUP.md) and
+[implementation and verification notes](docs/TASTE_TEST.md).
 
 ```text
 frontend/
   src/
-    App.jsx                  # Landing, sign-in, and taste-test pages
+    App.jsx                  # Landing and protected page routing
+    components/TasteTest.jsx  # Guided questionnaire and saved placeholder
+    components/InspirationUploader.jsx # Private upload gallery
     components/AuthProvider.jsx
     lib/supabase.js          # Supabase client and authenticated API requests
     styles/
@@ -95,6 +111,7 @@ frontend/
 backend/
   app/
     main.py                  # FastAPI routes and React build serving
+    onboarding.py            # Draft validation, private uploads, completion
     auth.py                  # Supabase access-token verification
     models.py                # SQLAlchemy user and taste profiles
     database.py              # SQLAlchemy engine and sessions
@@ -122,8 +139,8 @@ require your configured Supabase project. Automated backend tests use a
 mocked Supabase service and a temporary SQLite database.
 
 **Other features:** the responsive landing page, navigation, FAQs, and
-collage are implemented. The extension, full image uploads, AI Style DNA,
-and retailer integrations are still planned or illustrative.
+collage are implemented. The taste questionnaire and inspiration uploads are implemented. The extension,
+AI Style DNA, and retailer integrations remain planned or illustrative.
 
 ## Product journey
 

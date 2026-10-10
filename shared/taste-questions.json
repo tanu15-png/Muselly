@@ -1,0 +1,849 @@
+[
+  {
+    "id": "q1",
+    "stage": 0,
+    "title": "Who are you shopping for?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Women's fashion"
+      },
+      {
+        "id": "o2",
+        "label": "Men's fashion"
+      },
+      {
+        "id": "o3",
+        "label": "All styles"
+      },
+      {
+        "id": "o4",
+        "label": "Prefer not to specify"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": false,
+    "optional": false,
+    "hint": "Your style is yours. We never infer it from gender."
+  },
+  {
+    "id": "q2",
+    "stage": 0,
+    "title": "Which age range are you in?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Under 18"
+      },
+      {
+        "id": "o2",
+        "label": "18–24"
+      },
+      {
+        "id": "o3",
+        "label": "25–34"
+      },
+      {
+        "id": "o4",
+        "label": "35–44"
+      },
+      {
+        "id": "o5",
+        "label": "45+"
+      },
+      {
+        "id": "o6",
+        "label": "Prefer not to say"
+      }
+    ],
+    "multi": false,
+    "optional": true
+  },
+  {
+    "id": "q3",
+    "stage": 0,
+    "title": "What’s your usual clothing size?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "XS"
+      },
+      {
+        "id": "o2",
+        "label": "S"
+      },
+      {
+        "id": "o3",
+        "label": "M"
+      },
+      {
+        "id": "o4",
+        "label": "L"
+      },
+      {
+        "id": "o5",
+        "label": "XL"
+      },
+      {
+        "id": "o6",
+        "label": "XXL"
+      },
+      {
+        "id": "o7",
+        "label": "XXXL"
+      },
+      {
+        "id": "o8",
+        "label": "Not sure / varies"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": false,
+    "optional": true,
+    "hint": "Sizes vary across brands. Choose what feels closest."
+  },
+  {
+    "id": "q4",
+    "stage": 0,
+    "title": "What best describes your daily routine?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Student"
+      },
+      {
+        "id": "o2",
+        "label": "Office / professional"
+      },
+      {
+        "id": "o3",
+        "label": "Creative / freelancer"
+      },
+      {
+        "id": "o4",
+        "label": "Work from home"
+      },
+      {
+        "id": "o5",
+        "label": "Business owner"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      },
+      {
+        "id": "o7",
+        "label": "Prefer not to say"
+      }
+    ],
+    "multi": false,
+    "optional": false
+  },
+  {
+    "id": "q20",
+    "stage": 0,
+    "title": "Where do you currently live?",
+    "options": [],
+    "multi": false,
+    "optional": true,
+    "field": "location",
+    "hint": "City/region and country are enough. No street address needed."
+  },
+  {
+    "id": "q5",
+    "stage": 1,
+    "title": "What do you enjoy doing on weekends?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Cafés & brunch",
+        "visual": "weekend",
+        "tile": 0
+      },
+      {
+        "id": "o2",
+        "label": "Concerts & nightlife",
+        "visual": "weekend",
+        "tile": 1
+      },
+      {
+        "id": "o3",
+        "label": "Shopping",
+        "visual": "weekend",
+        "tile": 2
+      },
+      {
+        "id": "o4",
+        "label": "Traveling & exploring",
+        "visual": "weekend",
+        "tile": 3
+      },
+      {
+        "id": "o5",
+        "label": "Outdoor adventures",
+        "visual": "weekend",
+        "tile": 4
+      },
+      {
+        "id": "o6",
+        "label": "Movies & gaming",
+        "visual": "weekend",
+        "tile": 5
+      },
+      {
+        "id": "o7",
+        "label": "Staying home & relaxing",
+        "visual": "weekend",
+        "tile": 6
+      },
+      {
+        "id": "o8",
+        "label": "Sports & fitness",
+        "visual": "weekend",
+        "tile": 7
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q6",
+    "stage": 1,
+    "title": "What kind of vacations do you enjoy?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Beaches",
+        "visual": "vacation",
+        "tile": 0
+      },
+      {
+        "id": "o2",
+        "label": "Mountains",
+        "visual": "vacation",
+        "tile": 1
+      },
+      {
+        "id": "o3",
+        "label": "City exploring",
+        "visual": "vacation",
+        "tile": 2
+      },
+      {
+        "id": "o4",
+        "label": "Cultural & historical destinations",
+        "visual": "vacation",
+        "tile": 3
+      },
+      {
+        "id": "o5",
+        "label": "Luxury resorts",
+        "visual": "vacation",
+        "tile": 4
+      },
+      {
+        "id": "o6",
+        "label": "Adventure trips",
+        "visual": "vacation",
+        "tile": 5
+      },
+      {
+        "id": "o7",
+        "label": "Nature & countryside",
+        "visual": "vacation",
+        "tile": 6
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q7",
+    "stage": 1,
+    "title": "What music do you enjoy?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Pop"
+      },
+      {
+        "id": "o2",
+        "label": "Indie"
+      },
+      {
+        "id": "o3",
+        "label": "Hip-hop / rap"
+      },
+      {
+        "id": "o4",
+        "label": "K-pop"
+      },
+      {
+        "id": "o5",
+        "label": "Bollywood"
+      },
+      {
+        "id": "o6",
+        "label": "Rock"
+      },
+      {
+        "id": "o7",
+        "label": "Electronic / EDM"
+      },
+      {
+        "id": "o8",
+        "label": "Classical"
+      },
+      {
+        "id": "o9",
+        "label": "R&B"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false,
+    "extra": "Any favorite singers, bands, or artists?"
+  },
+  {
+    "id": "q8",
+    "stage": 1,
+    "title": "Which movies, shows, celebrities, or artists inspire your style?",
+    "options": [],
+    "multi": false,
+    "optional": true,
+    "hint": "Add names separated by commas. No need to search.",
+    "extra": "Wednesday, Taylor Swift, Friends, Zendaya…"
+  },
+  {
+    "id": "q9",
+    "stage": 2,
+    "title": "Which fashion aesthetics do you love?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Minimal / quiet luxury",
+        "visual": "outfit",
+        "tile": 0
+      },
+      {
+        "id": "o2",
+        "label": "Streetwear",
+        "visual": "outfit",
+        "tile": 1
+      },
+      {
+        "id": "o3",
+        "label": "Soft feminine",
+        "visual": "outfit",
+        "tile": 2
+      },
+      {
+        "id": "o4",
+        "label": "Y2K",
+        "visual": "outfit",
+        "tile": 3
+      },
+      {
+        "id": "o5",
+        "label": "Bohemian",
+        "visual": "outfit",
+        "tile": 4
+      },
+      {
+        "id": "o6",
+        "label": "Vintage / retro",
+        "visual": "outfit",
+        "tile": 5
+      },
+      {
+        "id": "o7",
+        "label": "Dark academia",
+        "visual": "outfit",
+        "tile": 6
+      },
+      {
+        "id": "o8",
+        "label": "Old money",
+        "visual": "outfit",
+        "tile": 7
+      },
+      {
+        "id": "o9",
+        "label": "Sporty casual",
+        "visual": "outfit",
+        "tile": 8
+      },
+      {
+        "id": "o10",
+        "label": "Traditional / ethnic",
+        "visual": "outfit",
+        "tile": 9
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      },
+      {
+        "id": "o12",
+        "label": "Surprise me / still exploring"
+      }
+    ],
+    "multi": true,
+    "optional": false,
+    "max": 3
+  },
+  {
+    "id": "q10",
+    "stage": 2,
+    "title": "Which colors do you gravitate toward?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Neutrals",
+        "visual": "palette",
+        "tile": 0
+      },
+      {
+        "id": "o2",
+        "label": "Earthy tones",
+        "visual": "palette",
+        "tile": 1
+      },
+      {
+        "id": "o3",
+        "label": "Pastels",
+        "visual": "palette",
+        "tile": 2
+      },
+      {
+        "id": "o4",
+        "label": "Dark tones",
+        "visual": "palette",
+        "tile": 3
+      },
+      {
+        "id": "o5",
+        "label": "Bright colors",
+        "visual": "palette",
+        "tile": 4
+      },
+      {
+        "id": "o6",
+        "label": "Monochrome",
+        "visual": "palette",
+        "tile": 5
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q11",
+    "stage": 2,
+    "title": "What fits and silhouettes do you prefer?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Oversized / relaxed",
+        "visual": "outfit",
+        "tile": 10
+      },
+      {
+        "id": "o2",
+        "label": "Fitted / bodycon",
+        "visual": "outfit",
+        "tile": 11
+      },
+      {
+        "id": "o3",
+        "label": "Flowy / loose",
+        "visual": "outfit",
+        "tile": 12
+      },
+      {
+        "id": "o4",
+        "label": "Structured / tailored",
+        "visual": "outfit",
+        "tile": 13
+      },
+      {
+        "id": "o5",
+        "label": "Straight / classic",
+        "visual": "outfit",
+        "tile": 14
+      },
+      {
+        "id": "o6",
+        "label": "I like experimenting",
+        "visual": "outfit",
+        "tile": 15
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q12",
+    "stage": 2,
+    "title": "What do you usually shop for?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Everyday / college",
+        "visual": "outfit",
+        "tile": 14
+      },
+      {
+        "id": "o2",
+        "label": "Parties / farewell",
+        "visual": "outfit",
+        "tile": 11
+      },
+      {
+        "id": "o3",
+        "label": "Work / formal",
+        "visual": "outfit",
+        "tile": 13
+      },
+      {
+        "id": "o4",
+        "label": "Festivals / ethnic",
+        "visual": "outfit",
+        "tile": 9
+      },
+      {
+        "id": "o5",
+        "label": "Vacation",
+        "visual": "outfit",
+        "tile": 12
+      },
+      {
+        "id": "o6",
+        "label": "Special occasions",
+        "visual": "outfit",
+        "tile": 2
+      },
+      {
+        "id": "o7",
+        "label": "Sports / activewear",
+        "visual": "outfit",
+        "tile": 8
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q13",
+    "stage": 2,
+    "title": "Which fashion brands do you like?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Zara"
+      },
+      {
+        "id": "o2",
+        "label": "H&M"
+      },
+      {
+        "id": "o3",
+        "label": "Uniqlo"
+      },
+      {
+        "id": "o4",
+        "label": "Nike"
+      },
+      {
+        "id": "o5",
+        "label": "Adidas"
+      },
+      {
+        "id": "o6",
+        "label": "Levi's"
+      },
+      {
+        "id": "o7",
+        "label": "Urbanic"
+      },
+      {
+        "id": "o8",
+        "label": "Savana"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      },
+      {
+        "id": "o10",
+        "label": "Not sure"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q14",
+    "stage": 2,
+    "title": "Which cultural interests appeal to you?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Art & design"
+      },
+      {
+        "id": "o2",
+        "label": "Anime"
+      },
+      {
+        "id": "o3",
+        "label": "Vintage cinema"
+      },
+      {
+        "id": "o4",
+        "label": "Music festivals"
+      },
+      {
+        "id": "o5",
+        "label": "Street culture"
+      },
+      {
+        "id": "o6",
+        "label": "Travel"
+      },
+      {
+        "id": "o7",
+        "label": "Photography"
+      },
+      {
+        "id": "o8",
+        "label": "Literature"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q15",
+    "stage": 2,
+    "title": "What should Muselly avoid recommending?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Neon colors"
+      },
+      {
+        "id": "o2",
+        "label": "Loud prints"
+      },
+      {
+        "id": "o3",
+        "label": "Bodycon fits"
+      },
+      {
+        "id": "o4",
+        "label": "Oversized fits"
+      },
+      {
+        "id": "o5",
+        "label": "Crop tops"
+      },
+      {
+        "id": "o6",
+        "label": "High heels"
+      },
+      {
+        "id": "o7",
+        "label": "Expensive items"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      },
+      {
+        "id": "none",
+        "label": "No strong dislikes"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q16",
+    "stage": 3,
+    "title": "Where do you usually shop online?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Myntra"
+      },
+      {
+        "id": "o2",
+        "label": "AJIO"
+      },
+      {
+        "id": "o3",
+        "label": "Amazon"
+      },
+      {
+        "id": "o4",
+        "label": "Flipkart"
+      },
+      {
+        "id": "o5",
+        "label": "Meesho"
+      },
+      {
+        "id": "o6",
+        "label": "Urbanic"
+      },
+      {
+        "id": "o7",
+        "label": "Savana"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q17",
+    "stage": 3,
+    "title": "Do you struggle to find outfits you’ve saved as inspiration?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Very often"
+      },
+      {
+        "id": "o2",
+        "label": "Sometimes"
+      },
+      {
+        "id": "o3",
+        "label": "Rarely"
+      },
+      {
+        "id": "o4",
+        "label": "Never"
+      }
+    ],
+    "multi": false,
+    "optional": false
+  },
+  {
+    "id": "q18",
+    "stage": 3,
+    "title": "What’s your biggest shopping frustration?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Can't find outfits similar to Pinterest inspirations"
+      },
+      {
+        "id": "o2",
+        "label": "Prices are too high"
+      },
+      {
+        "id": "o3",
+        "label": "Sizing issues"
+      },
+      {
+        "id": "o4",
+        "label": "Uncertain product quality"
+      },
+      {
+        "id": "o5",
+        "label": "Too many options"
+      },
+      {
+        "id": "o6",
+        "label": "Items are out of stock"
+      },
+      {
+        "id": "o7",
+        "label": "Difficult to find my preferred aesthetic"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false
+  },
+  {
+    "id": "q19",
+    "stage": 3,
+    "title": "How would you describe your shopping personality?",
+    "options": [
+      {
+        "id": "o1",
+        "label": "Trend-focused"
+      },
+      {
+        "id": "o2",
+        "label": "Timeless classics"
+      },
+      {
+        "id": "o3",
+        "label": "Experimental"
+      },
+      {
+        "id": "o4",
+        "label": "Comfort-first"
+      },
+      {
+        "id": "o5",
+        "label": "Budget-conscious"
+      },
+      {
+        "id": "o6",
+        "label": "Sustainability-minded"
+      },
+      {
+        "id": "other",
+        "label": "Other"
+      }
+    ],
+    "multi": true,
+    "optional": false,
+    "max": 3
+  }
+]

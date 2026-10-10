@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     supabase_publishable_key: str = ""
     database_url: str = ""
     app_origin: str = "http://localhost:5173"
+    supabase_service_role_key: str = ""
+    supabase_secret_key: str = ""
 
 
 @lru_cache

@@ -18,6 +18,7 @@ from .auth import AuthUser, get_current_user
 from .config import Settings, get_settings
 from .database import get_db
 from .models import TasteProfile, UserProfile
+from .onboarding import router as onboarding_router
 
 Style = Literal["romantic", "classic", "casual", "chic"]
 
@@ -40,12 +41,15 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         async with httpx.AsyncClient(timeout=10, transport=auth_transport) as client:
-            app.state.auth_client = client
-            yield
+            with httpx.Client(timeout=60, transport=auth_transport) as storage_client:
+                app.state.storage_client = storage_client
+                app.state.auth_client = client
+                yield
 
     app = FastAPI(title="Muselly API", lifespan=lifespan)
     app.state.settings = settings
-    app.add_middleware(CORSMiddleware, allow_origins=[settings.app_origin], allow_methods=["GET", "PUT"], allow_headers=["Authorization", "Content-Type"])
+    app.add_middleware(CORSMiddleware, allow_origins=[settings.app_origin], allow_methods=["GET", "PUT", "POST", "DELETE"], allow_headers=["Authorization", "Content-Type", "X-Filename"])
+    app.include_router(onboarding_router)
 
     @app.middleware("http")
     async def response_headers(request, call_next):
@@ -93,8 +97,8 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
         return FileResponse(public / "index.html", headers={"Cache-Control": "no-cache"})
 
     # The React route guard verifies bearer tokens before showing the taste UI;
-    # both taste API endpoints independently verify authentication server-side.
-    for route in ("/", "/sign-in", "/taste-test", "/auth/callback"):
+    # every taste/onboarding API independently verifies authentication server-side.
+    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/auth/callback"):
         app.add_api_route(route, entry_page, methods=["GET"], include_in_schema=False)
     for name in ("assets", "images"):
         if (public / name).is_dir():
