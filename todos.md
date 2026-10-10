@@ -8,6 +8,12 @@
 > user can actually use it end-to-end. Read `README.md` for product
 > behavior and `style.md` for UI consistency.
 
+## Technology stack
+
+**React + Vite frontend · Python + FastAPI backend · Supabase Auth and
+PostgreSQL · SQLAlchemy models · Alembic migrations.** Node.js/npm are
+frontend build tools. See [setup instructions](docs/SETUP.md).
+
 ## Phase 1 --- Landing page and entry flow
 
 **Outcome:** A visitor understands Muselly and can start onboarding.
@@ -16,7 +22,7 @@
     design.
 -   [x] Add navigation anchors: **How it works · For you · Extension ·
     FAQs**.
--   [x] Add **Sign in** and **Get taste test** actions.
+-   [x] Add **Sign in** and **Get started** actions; show **Start taste test** only after verified sign-in.
 -   [x] Build the How it works, For you, Extension and FAQs sections.
 -   [x] Add **Get Extension** CTA (show "Coming soon" until the
     extension is published).
@@ -28,10 +34,11 @@
 **Done when:** A new visitor can navigate the page and reach the taste
 test.
 
-**Phase 1 implementation:** React landing page and a selectable taste-test
-entry preview are available. Sign-in explains the upcoming Phase 2 account
-flow; the full taste test remains in Phase 3. Production build and Node.js
-request-handler tests pass. Browser verification remains outstanding.
+**Current implementation:** React landing page and taste-test entry are
+available. Email/password and Google sign-in use Supabase, with server
+verification in the Python API. SQLAlchemy models and Alembic migrations
+support saved aesthetics. Live Supabase configuration and browser checks
+remain necessary before marking authentication as verified end-to-end.
 
 ## Phase 2 --- Authentication and user account
 
@@ -44,6 +51,12 @@ request-handler tests pass. Browser verification remains outstanding.
     users.
 -   [ ] Add basic account settings and a way to delete uploaded
     inspirations.
+
+**Implementation available:** Supabase email sign-up/sign-in, Google OAuth,
+sign-out, session refresh, protected taste-test APIs, and user/taste models
+are implemented. Configure the Supabase project, apply migrations, and
+verify real email/Google flows. Dashboard, collections, account settings,
+and uploaded-image deletion remain pending.
 
 **Done when:** A user can return later and find their own saved data.
 
@@ -230,6 +243,6 @@ tracking
 
 ## Next action
 
-**Start with Phase 1.** Complete each phase's **Done when** condition
-before moving on; do not build all retailer integrations or advanced
+**Configure Supabase and verify Phase 2 sign-in and saved taste selections.**
+Then continue the remaining Phase 3 test and upload features; do not build all retailer integrations or advanced
 agent workflows before a single end-to-end shopping path works.

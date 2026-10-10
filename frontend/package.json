@@ -6,14 +6,19 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "lucide-react": "0.469.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "lucide-react": "0.469.0"
+    "react-dom": "19.2.3"
   },
   "devDependencies": {
-    "vite": "7.3.0"
+    "@testing-library/react": "^16.3.3",
+    "jsdom": "^29.1.1",
+    "vite": "7.3.0",
+    "vitest": "^5.0.3"
   }
 }

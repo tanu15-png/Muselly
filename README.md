@@ -4,79 +4,126 @@
 
 Muselly is an AI-powered fashion discovery platform that learns a user's style from a visual taste test and inspiration images, then helps them find matching products across supported shopping sites. A companion Chrome extension brings that taste profile into everyday browsing.
 
-## Local setup — Phase 1
+## Technology stack
 
-The frontend uses **React and JavaScript with Vite**. The backend uses
-**Node.js**, with no backend dependencies required for Phase 1. Use Node.js
-22.12 or newer (Node.js 24 recommended).
+- **Frontend:** React and JavaScript, built with Vite.
+- **Backend:** Python 3.12+ and FastAPI, served by Uvicorn.
+- **Authentication:** Supabase Auth for email/password and Google sign-in.
+- **Database:** Supabase PostgreSQL, accessed by Python using SQLAlchemy and psycopg.
+- **Migrations:** Alembic manages the application tables. Supabase manages its authentication tables.
 
-Run the frontend from its own directory:
+Node.js and npm are used only for React development and frontend builds.
+The backend runs with Python; there is no Node.js backend.
+
+## Setup
+
+Follow [the setup guide](docs/SETUP.md) to create your Supabase project,
+configure email and Google authentication, and fill in both `.env` files.
+
+Run the Python backend from `backend/`:
+
+```bash
+cd backend
+cp .env.example .env
+# Fill in .env before migrating.
+uv sync
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Run the React frontend in another terminal:
 
 ```bash
 cd frontend
+cp .env.example .env
+# Fill in .env with the same Supabase project's URL and publishable key.
 npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (normally `http://localhost:5173`).
-The backend runs independently in a separate terminal:
+Open `http://localhost:5173`. Vite proxies `/api` to the Python backend at
+`http://127.0.0.1:8000`. API docs are at `http://127.0.0.1:8000/docs`;
+`GET /api/health` reports whether the API is running.
 
-```bash
-cd backend
-npm run dev
-```
+To serve the built React app through Python, run `npm run build` from
+`frontend/`, set `APP_ORIGIN=http://localhost:8000` in `backend/.env`, add
+`http://localhost:8000/auth/callback` to Supabase's redirect allow list,
+and start Uvicorn. Frontend environment variables are compiled into the
+build; rebuild after changing them.
 
-To serve the production frontend build through Node.js, first build it
-from `frontend/`:
+## Sign-in and taste test
 
-```bash
-npm run build
-```
+The landing page has a **Sign in** link and a **Get started** action, both
+leading to `/sign-in`. The sign-in card offers email/password, email
+account creation, and Google authentication below the headline. After
+Python verifies the Supabase session, the card shows one **Start taste
+test** action for returning email users. New registrations and Google/email
+confirmation callbacks continue directly to the taste test after verification.
+Visiting `/taste-test` while signed out returns to sign-in.
 
-Then run `npm start` from `backend/`.
+Email registration without an immediate session shows a confirmation/resend
+screen. Opening the newest email link in the same browser signs the user in
+and opens the taste test, without asking for another password. Supabase's
+default email service restricts recipients; see the setup guide for custom SMTP.
 
-Open `http://localhost:3000`. Set `PORT` to change the backend port.
-`GET /api/health` returns the backend health status. Run `npm test` from
-`backend/` for the backend request-handler checks. The repository root has
-no npm package or run scripts; each app owns its dependencies and scripts.
+The React app uses Supabase's PKCE flow and manages session refresh.
+The Python API independently checks access tokens with Supabase before
+returning or saving any taste-test data. Passwords and Google credentials
+are managed by Supabase, not application tables or a local account file.
+
+SQLAlchemy models `UserProfile` and `TasteProfile` store application
+profile details and selected aesthetics in PostgreSQL. **Continue** saves
+answers through the authenticated API; returning users can revisit and
+edit their selections. The application uses the verified Supabase user
+ID for every database query. It does not generate an AI Style DNA yet.
+
+Alembic migration `0001_profiles` creates only `muselly_user_profiles`
+and `muselly_taste_profiles`. It enables row-level security and revokes
+browser Data API access to these tables. The Python API accesses them
+through its private database connection. Supabase's `auth.users` schema
+is not modified. User profile IDs mirror Supabase user IDs; account
+removal should also remove the matching application profile.
 
 ```text
 frontend/
-  package.json
-  index.html
   src/
-    main.jsx          # React mounting entry point
-    App.jsx           # Application UI and page selection
-    components/       # Shared UI components
-    styles/           # Shared design tokens and styles
-  public/
+    App.jsx                  # Landing, sign-in, and taste-test pages
+    components/AuthProvider.jsx
+    lib/supabase.js          # Supabase client and authenticated API requests
+    styles/
+  .env.example
 backend/
-  package.json
-  server.js
-  server.test.js
+  app/
+    main.py                  # FastAPI routes and React build serving
+    auth.py                  # Supabase access-token verification
+    models.py                # SQLAlchemy user and taste profiles
+    database.py              # SQLAlchemy engine and sessions
+    config.py                # Environment configuration
+  alembic/                   # Database migrations
+  tests/
+  pyproject.toml
+  uv.lock
+  .env.example
 ```
 
-**Implemented:** responsive landing page, section navigation, mobile menu,
-FAQs, a visual taste-test entry preview at `/taste-test`, and a sign-in
-entry page at `/sign-in`. The extension CTA shows **Coming soon**.
+Check the implementation with:
 
-**Scope:** authentication belongs to Phase 2; the full taste test and
-image uploads belong to Phase 3. The taste preview supports selecting
-and revising aesthetics, with choices held only in React page state.
-It does not save an account or generate an AI profile. Retailer names,
-Style DNA, and extension examples are labeled as planned or illustrative.
+```bash
+# From backend/
+uv run pytest
 
-Shared tokens live in `frontend/src/styles/tokens.css`; shared UI
-components live in `frontend/src/components/`. The supplied images from
-`assets/images` are copied to `frontend/public/images` for serving. Fonts
-load from Google Fonts with local fallbacks, without distributing font
-files. The approved composition is in `assets/references/landingpage.png`.
+# From frontend/
+npm test
+npm run build
+```
 
-**Verification:** the production build and Node.js request-handler tests
-pass. Live browser testing is still needed at 375, 768, 1024, and 1440px;
-the implementation environment blocks local listening sockets. Check
-the mobile menu, all navigation anchors, FAQs, selection/continue/edit,
-keyboard focus, and horizontal overflow at those sizes.
+Live Google sign-in, confirmation emails, and PostgreSQL connections
+require your configured Supabase project. Automated backend tests use a
+mocked Supabase service and a temporary SQLite database.
+
+**Other features:** the responsive landing page, navigation, FAQs, and
+collage are implemented. The extension, full image uploads, AI Style DNA,
+and retailer integrations are still planned or illustrative.
 
 ## Product journey
 
@@ -91,7 +138,7 @@ Chrome extension ↔ Saved Style DNA + inspiration library
 
 ### 1. Landing page and onboarding
 
-The landing page introduces Muselly with **“Discover fashion that feels like you.”** Its navigation includes **How it works · For you · Extension · FAQs**, plus **Sign in** and **Get taste test** actions. The Extension section includes a **Get Extension** button.
+The landing page introduces Muselly with **“Discover fashion that feels like you.”** Its navigation includes **How it works · For you · Extension · FAQs**, plus a **Sign in** action. The hero’s **Get started** button opens sign-in; the taste-test option appears after authentication. The Extension section includes a **Get Extension** button.
 
 After signing in, users complete a short visual taste test (preferred outfits, aesthetics, colors, silhouettes, and dislikes). They can also upload photos, screenshots, or Pinterest inspirations. Connecting a Pinterest account/board is a *future enhancement*, subject to API access and permissions; the MVP supports manual uploads and saving individual images through the extension.
 
