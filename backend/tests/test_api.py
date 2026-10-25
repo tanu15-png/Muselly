@@ -102,7 +102,7 @@ def test_saved_answers_are_validated_and_isolated_by_verified_user(client, datab
 
 def test_migration_round_trip_and_model_consistency(database):
     engine, config = database
-    assert set(inspect(engine).get_table_names()) == {"alembic_version", "muselly_user_profiles", "muselly_taste_profiles", "muselly_taste_tests", "muselly_inspiration_images"}
+    assert set(inspect(engine).get_table_names()) == {"alembic_version", "muselly_user_profiles", "muselly_taste_profiles", "muselly_taste_tests", "muselly_inspiration_images", "muselly_taste_analysis_runs", "muselly_taste_enrichment_runs", "muselly_taste_affinity_dismissals", "muselly_saved_products", "muselly_product_feedback", "muselly_cultural_runs", "muselly_cultural_feedback", "muselly_cultural_sessions", "muselly_cultural_exposures", "muselly_cultural_events"}
     command.check(config)
     command.downgrade(config, "base")
     assert set(inspect(engine).get_table_names()) == {"alembic_version"}
@@ -120,7 +120,7 @@ def test_serves_only_known_react_routes_and_assets(tmp_path):
     (tmp_path / "images").mkdir()
     (tmp_path / "images" / "collage.png").write_bytes(b"collage")
     with TestClient(create_app(Settings(_env_file=None), public_directory=tmp_path)) as client:
-        for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/auth/callback"):
+        for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/explore", "/auth/callback"):
             assert client.get(route).status_code == 200
             assert client.get(route).text == "<main>React frontend</main>"
         assert client.get("/images/collage.png").content == b"collage"

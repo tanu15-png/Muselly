@@ -1,3 +1,4 @@
+import ResilientImage from './ResilientImage';
 import { useEffect, useState } from 'react';
 import { ArrowRight, Mail } from 'lucide-react';
 import { Button, Card } from './ui';
@@ -138,6 +139,6 @@ export default function SignIn({ header }) {
         {(error || authError) && <p className="sign-in-error" role="alert">{error || authError}</p>}
       </div>
     </Card>
-    <div className="sign-in-photo"><img src="/images/collage.png" alt="A collage of fashion and personal style inspirations" /><span className="handwritten">A style story.<br />Entirely yours.</span></div>
+    <div className="sign-in-photo"><ResilientImage src="/images/collage.png" alt="A collage of fashion and personal style inspirations" /><span className="handwritten">A style story.<br />Entirely yours.</span></div>
   </main></>;
 }

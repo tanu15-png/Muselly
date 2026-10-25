@@ -2,7 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import TasteTest from './TasteTest';
 import QuestionCard from './QuestionCard';
-import InspirationUploader from './InspirationUploader';
+import InspirationUploader, { PrivateImage } from './InspirationUploader';
 import { apiRequest, uploadInspiration } from '../lib/supabase';
 import { openStylePlaceholder } from '../lib/navigation';
 import { emptyAnswer, questions } from './taste';
@@ -17,6 +17,7 @@ const completeAnswers = () => Object.fromEntries(questions.filter(q => !q.option
 
 beforeEach(() => {
   vi.resetAllMocks();
+  window.history.replaceState({}, '', '/taste-test');
   saved = { answers: {}, position: 0, images: [], completed_at: null };
   apiRequest.mockImplementation(async (path, options) => {
     if (options?.blob) return new Blob(['image']);
@@ -124,6 +125,14 @@ it('accepts multiple inspiration names as removable tags', () => {
 });
 
 describe('inspiration uploads', () => {
+  it('shows the backend preview failure and retries the same saved image', async () => {
+    apiRequest.mockRejectedValueOnce({ status: 503, message: 'Image storage could not be reached. Please retry.' });
+    render(<PrivateImage image={metadata('stored-image')} />);
+    expect((await screen.findByRole('alert')).textContent).toBe('Image storage could not be reached. Please retry.');
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Retry preview' })));
+    expect(screen.getByRole('img').getAttribute('src')).toBe('blob:preview');
+    expect(apiRequest.mock.calls.every(([path]) => path === '/api/onboarding/images/stored-image')).toBe(true);
+  });
   it('validates types, size, count, and permits retry after upload failure', async () => {
     const changes = vi.fn();
     render(<InspirationUploader initialImages={[]} onChange={changes} />);
@@ -184,22 +193,47 @@ it('blocks fewer than five images, then saves and completes with five images', a
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Finish Taste Test/ })); });
   expect(apiRequest).toHaveBeenCalledWith('/api/onboarding/complete', { method: 'POST' });
   expect(openStylePlaceholder).toHaveBeenCalledOnce();
-  expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/coming next/);
+  expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/taste test.*saved/s);
 });
 
 it('returns completed users to the saved placeholder and allows editing without resetting data', async () => {
   saved = { ...saved, completed_at: '2026-01-01', answers: completeAnswers(), images: Array.from({ length: 5 }, (_, i) => metadata(`id-${i}`)), position: questions.length };
   render(<TasteTest />);
-  await screen.findByRole('heading', { name: /coming next/ });
+  await screen.findByRole('heading', { name: /taste test.*saved/s });
   fireEvent.click(screen.getByRole('button', { name: /Edit my taste test/ }));
   expect(screen.getByRole('button', { name: "Women's fashion" }).getAttribute('aria-pressed')).toBe('true');
   expect(saved.completed_at).toBeTruthy();
 });
 
+it('opens saved preferences directly from the dashboard edit link without redirecting', async () => {
+  saved = { ...saved, completed_at: '2026-01-01', answers: completeAnswers(), position: questions.length };
+  window.history.replaceState({}, '', '/taste-test?edit=1');
+  render(<TasteTest redirectCompleted />);
+  await screen.findByRole('heading', { name: /Who are you shopping for/ });
+  expect(screen.getByRole('button', { name: "Women's fashion" }).getAttribute('aria-pressed')).toBe('true');
+  expect(screen.getByRole('button', { name: /Jump to end/ })).toBeTruthy();
+  expect(openStylePlaceholder).not.toHaveBeenCalled();
+});
+
+it('opens inspiration management directly from the dashboard without clearing saved images', async () => {
+  saved = { ...saved, completed_at: '2026-01-01', answers: completeAnswers(), images: Array.from({ length: 5 }, (_, i) => metadata(`id-${i}`)) };
+  window.history.replaceState({}, '', '/taste-test?edit=1&step=inspirations');
+  render(<TasteTest redirectCompleted />);
+  await screen.findByRole('heading', { name: /Show us what/ });
+  expect(screen.getByText('5 / 10 images uploaded')).toBeTruthy();
+  expect(openStylePlaceholder).not.toHaveBeenCalled();
+});
+
+it('sends completed returning users to the dashboard when they are not editing', async () => {
+  saved = { ...saved, completed_at: '2026-01-01', answers: completeAnswers() };
+  render(<TasteTest redirectCompleted />);
+  await waitFor(() => expect(openStylePlaceholder).toHaveBeenCalledOnce());
+});
+
 it('jumps straight to inspirations while editing and saves changed choices before finishing', async () => {
   saved = { ...saved, completed_at: '2026-01-01', answers: completeAnswers(), images: Array.from({ length: 5 }, (_, i) => metadata(`id-${i}`)), position: questions.length };
   render(<TasteTest />);
-  await screen.findByRole('heading', { name: /coming next/ });
+  await screen.findByRole('heading', { name: /taste test.*saved/s });
   fireEvent.click(screen.getByRole('button', { name: /Edit my taste test/ }));
   fireEvent.click(screen.getByRole('button', { name: "Men's fashion" }));
   let resolveSave;
@@ -301,4 +335,25 @@ it('recovers a failed in-flight save using the latest queued answers', async () 
   expect(saved.answers.q2.choices).toEqual(['o2']);
   expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/clothing size/);
   expect(screen.getByText('Progress saved to your account')).toBeTruthy();
+});
+
+it('keeps previous shopping destinations visible only for existing selections', () => {
+  const question = questions.find(item => item.id === 'q16');
+  const view = render(<QuestionCard question={question} answer={emptyAnswer()} onChange={vi.fn()} />);
+  expect(screen.queryByRole('button', { name: 'Meesho' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Urbanic' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Savana' })).toBeNull();
+  view.rerender(<QuestionCard question={question} answer={{ ...emptyAnswer(), choices: ['o5', 'o6', 'o7'] }} onChange={vi.fn()} />);
+  for (const name of ['Meesho', 'Urbanic', 'Savana']) {
+    expect(screen.getByRole('button', { name }).getAttribute('aria-pressed')).toBe('true');
+  }
+});
+
+
+it('opens the requested preference question from an enrichment recovery link', async () => {
+  window.history.replaceState({}, '', '/taste-test?edit=1&question=q7');
+  render(<TasteTest />);
+  expect(await screen.findByRole('heading', { level: 1, name: 'What music do you enjoy?' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: /Jump to end/ })).toBeTruthy();
+  window.history.replaceState({}, '', '/');
 });

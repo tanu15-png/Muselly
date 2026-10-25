@@ -55,8 +55,8 @@ remain necessary before marking authentication as verified end-to-end.
 **Implementation available:** Supabase email sign-up/sign-in, Google OAuth,
 sign-out, session refresh, protected taste-test APIs, and user/taste models
 are implemented. Configure the Supabase project, apply migrations, and
-verify real email/Google flows. The full Style DNA dashboard, collections, and
-account settings remain pending; onboarding image deletion is implemented
+verify real email/Google flows. The taste dashboard is implemented; collections
+and account settings remain pending. Onboarding image deletion is implemented
 in Phase 3.
 
 **Done when:** A user can return later and find their own saved data.
@@ -68,18 +68,18 @@ in Phase 3.
 -   [x] Build a multi-step visual taste test with outfit/style choices.
 -   [x] Collect preferred colors, fits, aesthetics, occasions, and
     dislikes.
--   [ ] Allow users to upload multiple outfit images and screenshots.
-    Implemented and tested with mocked Storage; live acceptance requires the
-    secret/service_role key rather than the currently configured anon key.
+-   [x] Allow users to upload multiple outfit images and screenshots.
+    Five user-uploaded private images were retrieved successfully for the live
+    analysis run on 2026-10-10; upload validation/retry tests also pass.
 -   [x] Show image previews, remove/retry, upload progress, and error
     states.
--   [ ] Save taste-test answers and inspiration images to the account.
-    Draft persistence and image metadata are implemented. Migration is applied;
-    live image persistence awaits the correct backend storage credential.
+-   [x] Save taste-test answers and inspiration images to the account.
+    Verified a completed live account with 19 saved answers (one optional
+    question omitted), five image records, and five readable private objects.
 -   [x] Allow skipping optional questions and editing answers later.
 
 **Done when:** A new user completes all required answers and uploads 5–10
-inspiration images successfully, then returns to the saved placeholder.
+inspiration images successfully, then returns to their taste dashboard.
 
 **Implemented:** Twenty questions across five stages, including optional Q20
 current city/region and country. Reusable image choices, swatches, chips, tags,
@@ -88,8 +88,12 @@ save queue, immediate Back/Continue/Skip, and saved completed-state editing. Ima
 browse/drop, byte progress, private authenticated previews, retry, removal,
 and atomic replacement. Backend validation checks image contents, size, pixels,
 and required answers. Completion confirms 5–10 durable storage objects.
-The dashboard route is explicitly a “Style DNA is coming next” placeholder.
-No Gemini, Qloo, analysis, recommendations, or final Style DNA is implemented.
+The dashboard route now displays saved preferences, private inspirations, and
+actual Gemini analysis, with explicit generation/regeneration actions (Phase 4).
+Qloo enrichment is implemented with backend-only API access, versioned runs,
+normalized provenance, dashboard controls, and persistent affinity dismissal.
+Live Qloo verification requires configuring the account key. Shopping
+recommendations remain future work. See [the enrichment guide](docs/QLOO_ENRICHMENT.md).
 
 **Verification (2026-10-10):** React interaction tests include the complete
 20-question flow. Backend tests cover temporary migrated databases, mocked
@@ -103,12 +107,11 @@ checks are in ignored `test-results/taste/`.
 **Live setup:** `0002_taste_test` is applied to the configured Supabase project.
 Read-only verification confirms the private bucket, 10 MB object limit, RLS on
 both new tables, no browser storage policies, and no authenticated Data API
-SELECT grants. A live round-trip attempt confirmed that the supplied storage
-credential is an anon/public JWT; private upload correctly failed. Isolated
-test database records were removed. Set `SUPABASE_SECRET_KEY` in `backend/.env`
-to the dashboard secret key (`sb_secret_...`), or set `SUPABASE_SERVICE_ROLE_KEY`
-to the legacy **service_role** key. Restart Python and verify live upload/read/
-replace/delete/completion before ticking the two remaining items.
+SELECT grants. An earlier anon/public credential correctly failed a private
+upload, and isolated test records were removed. The backend credential is now
+working: all five actual user uploads were read from private Storage during
+analysis. Live replacement/deletion have not been exercised in this analysis
+task; those operations remain covered by automated mocked-Storage tests.
 
 See [implementation/setup notes](docs/TASTE_TEST.md).
 
@@ -116,39 +119,82 @@ See [implementation/setup notes](docs/TASTE_TEST.md).
 
 **Outcome:** Inputs become an understandable, editable Style DNA.
 
--   [ ] Use a vision model to extract colors, silhouettes, garment
+-   [x] Use a vision model to extract colors, silhouettes, garment
     types, and aesthetic descriptors from uploaded images.
--   [ ] Normalize overlapping attributes and combine them with
+-   [x] Expose authenticated backend analysis endpoints and save versioned
+    JSON runs with questionnaire/image sources, model, token usage, timestamps,
+    cache reuse, stale detection, and sanitized failure/retry states.
+-   [x] Normalize overlapping attributes and combine them with
     taste-test answers.
--   [ ] Match supported brands/cultural interests to valid Qloo entities
+-   [x] Match supported brands/cultural interests to valid Qloo entities
     or tags.
--   [ ] Query Qloo for relevant affinities; keep unsupported attributes
+-   [x] Query Qloo for relevant affinities; keep unsupported attributes
     in your own style model.
--   [ ] Store the resulting profile with source information (test,
+-   [x] Store the resulting profile with source information (test,
     image, or Qloo).
--   [ ] Build a **Style DNA** view: top aesthetics, palette, fits,
+-   [x] Build a **Style DNA** view: top aesthetics, palette, fits,
     inspiration gallery, and optional affinities.
+    The taste dashboard displays actual Gemini interpretations with image
+    evidence and the original questionnaire. Qloo affinities have explicit generation/refresh, source labels, and hide/restore controls.
 -   [ ] Let users correct or remove inferred preferences and regenerate
     the profile.
--   [ ] Handle Qloo/API failures gracefully without blocking basic
+    Qloo affinities can be hidden/restored; direct Gemini-attribute editing remains pending.
+-   [x] Handle Qloo/API failures gracefully without blocking basic
     visual profiling.
 
 **Done when:** A user sees a plausible profile, can explain where its
 signals came from, and can edit it.
 
+**Backend verification (2026-10-10):** Migration `0003_taste_analysis` is
+applied. An actual Gemini run analyzed the saved 19 answers and five private
+images, and persisted a schema-validated result. `gemini-3.8-flash` and
+`gemini-3.5-flash` were overloaded, so the successful run used
+`gemini-3-flash-preview`; `backend/.env` now selects that model. GET/POST
+`/api/onboarding/analysis` are available in the running API; unauthenticated
+GET returns 401. The full provider schema was rejected, so a live-verified
+simplified wire schema is used while full backend validation remains strict.
+Analysis JSON includes per-image observations, recurring signals, questionnaire
+interpretation, evidence-linked conflicts, and limitations. At that checkpoint,
+normalization and Qloo remained pending; they are now implemented as documented
+in [the enrichment guide](docs/QLOO_ENRICHMENT.md). Direct inferred-attribute
+editing and shopping recommendations remain pending. All 46 backend tests pass, including migration consistency, owner
+isolation, cached/forced runs, stale snapshots, timeouts, overload responses,
+invalid model output/evidence, and retry behavior. See
+[analysis API documentation](docs/ANALYSIS.md).
+
 ## Phase 5 --- Dashboard and inspiration library
 
 **Outcome:** The dashboard becomes the home for personal style.
 
--   [ ] Build dashboard overview with **Shop my taste**, Style DNA
-    summary, and recent inspirations.
+-   [x] Build dashboard overview with Style DNA summary and recent inspirations.
+-   [x] Add **Shop my taste** search once a real product source is integrated.
+-   [x] Display saved questionnaire preferences, evidence-linked AI insights,
+    and private inspiration cards on the authenticated dashboard.
 -   [ ] Add an inspiration library with image cards and delete/save
     actions.
+    The gallery and “Manage inspirations” link are implemented; direct card
+    save/delete actions and collections remain future work.
 -   [ ] Add simple collections or tags (e.g., Farewell, Casual,
     Workwear).
--   [ ] Provide **Add inspiration** from the dashboard.
+-   [x] Provide **Add inspiration** from the dashboard.
+    “Manage inspirations” opens the existing validated upload stage directly.
 -   [ ] Show recent searches and saved product recommendations.
--   [ ] Keep dashboard layout consistent with `style.md`.
+-   [x] Keep dashboard layout consistent with `style.md`.
+
+**Dashboard verification (2026-10-16):** Responsive editorial layout, private
+previews, original brand/custom answers, keyboard evidence navigation, explicit
+regeneration, stale-version detection, previous-result preservation, failed/empty/
+incomplete states, and signed-out redirects are verified. All 42 frontend tests
+and 47 backend tests pass; production build passes. Edge checks cover 375, 768,
+1024, and 1440px with no horizontal overflow or runtime errors. Browser Auth/API
+responses are mocked, using the actual saved analysis fixture and illustrative
+local images; this is not a new live Supabase login or Gemini run. Screenshots
+and the check script are ignored under `test-results/dashboard/`.
+
+That dashboard checkpoint preceded Qloo integration. The current enrichment
+panel needs backend Qloo configuration and migration `0004_qloo_enrichment`,
+with no added package dependencies.
+See [dashboard implementation notes](docs/DASHBOARD.md).
 
 **Done when:** A user can manage inspirations and start shopping from
 one place.
@@ -157,19 +203,19 @@ one place.
 
 **Outcome:** Users can ask for outfits in natural language.
 
--   [ ] Add a search box for prompts such as "Find a farewell dress
+-   [x] Add a search box for prompts such as "Find a farewell dress
     under ₹3,000."
--   [ ] Parse category, occasion, budget, color, fit, and other
+-   [x] Parse category, occasion, budget, color, fit, and other
     constraints.
--   [ ] Show editable filters before or after searching.
--   [ ] Add retailer selection: Amazon, Flipkart, Meesho, Myntra, AJIO,
-    Urbanic, Savana.
--   [ ] Connect at least **one legitimate, permitted source of product
+-   [x] Show editable filters before or after searching.
+-   [x] Add source selection: four connected Qloo brand stores and external
+    search links for SHEIN, Myntra, AJIO, Amazon Fashion, Flipkart, Nykaa Fashion.
+-   [x] Connect at least **one legitimate, permitted source of product
     listings** with title, image, price, URL, and retailer.
--   [ ] Add a second retailer/source only after the first is reliable.
--   [ ] Implement loading, empty, failed-search, and
+-   [x] Add a second retailer/source only after the first is reliable.
+-   [x] Implement loading, empty, failed-search, and
     unsupported-retailer states.
--   [ ] Do not show invented live prices, stock, or listings.
+-   [x] Do not show invented live prices, stock, or listings.
 
 **Done when:** A user submits a query and receives real linked products
 from at least one supported source.
@@ -178,18 +224,22 @@ from at least one supported source.
 
 **Outcome:** Search results are personalized rather than generic.
 
--   [ ] Rank retrieved products using query fit, visual attributes, user
+-   [x] Rank retrieved products using query fit, visual attributes, user
     preferences, and applicable Qloo-enriched signals.
--   [ ] Apply hard constraints (especially budget and selected retailer)
+-   [x] Apply hard constraints (especially budget and selected retailer)
     before ranking.
--   [ ] Display product image, name, price, retailer, and **View on
+-   [x] Display product image, name, price, retailer, and **View on
     retailer** link.
--   [ ] Add **Why this matches** with specific, grounded explanations.
--   [ ] Show match percentages only if a documented ranking calculation
+-   [x] Add **Why this matches** with specific, grounded explanations.
+-   [x] Show match percentages only if a documented ranking calculation
     exists; otherwise use descriptive labels.
 -   [ ] Add **Save product** and **Not my style** feedback.
--   [ ] Provide a simple **Generic vs My Taste** comparison for the
+-   [x] Provide a simple **Generic vs My Taste** comparison for the
     hackathon demo.
+
+Implemented ranking modes: **My taste** and **Search relevance**. Common English
+query parsing is deterministic; product search makes no additional AI request.
+See [implementation and limitations](docs/PRODUCT_SEARCH.md).
 
 **Done when:** Two different taste profiles can receive meaningfully
 different rankings for the same query.
@@ -281,8 +331,23 @@ tracking
 
 ## Next action
 
-**Configure the backend secret/service_role key and verify live private
-inspiration uploads.** The five-stage questionnaire and upload implementation
-are ready; finish Phase 3 live acceptance before starting the separate analysis
-phase. Gemini, Qloo, recommendations, and the final Style DNA dashboard remain
-out of scope for this implementation.
+**Configure Qloo credentials and verify live coverage using [the capability check](docs/QLOO_ENRICHMENT.md), then implement the first retailer product adapter.**
+The questionnaire, private inspirations, Gemini analysis, and dashboard are
+implemented, including Qloo enrichment. Unsupported brands retain their original
+preferences. Configure the backend Qloo key and run the capability check before
+claiming live coverage; product retrieval and recommendations remain future work.
+
+## Implemented extension direction — 2026-10-19
+
+- [x] Website restricted to taste/Style DNA, Qloo brands, inspirations, and saved finds.
+- [x] Get Extension downloads a credential-free Manifest V3 ZIP with installation guide.
+- [x] Explicit nonce-based account pairing with verified owner context.
+- [x] Prompt-based retailer searches and ranking of up to 100 loaded cards.
+- [x] Visible-tab snapshots, crop preview, image upload, and Find similar.
+- [x] Private product bookmarks and private inspiration snapshot uploads.
+- [x] Persistent extension prompts/results and account-isolated workspace.
+- [x] Saved-products migration, owner isolation, extraction and messaging tests.
+- [ ] Publish a store listing for one-click installation.
+- [ ] Expand live retailer coverage and monitor layout changes.
+
+See [current behavior and verification](docs/EXTENSION.md).

@@ -1,5 +1,12 @@
 # Muselly
 
+> **Current product direction:** Use the website for the taste test, Style DNA,
+> private inspirations, Qloo brand exploration, and saved finds. Product search,
+> Qloo discovery, personalized ranking, corrections, and saving live in the downloadable
+> Chrome/Edge extension. **Get Extension** downloads its ZIP; follow the
+> [installation and feature guide](docs/EXTENSION.md) to load it unpacked.
+
+
 **Your taste, everywhere you shop.**
 
 Muselly is an AI-powered fashion discovery platform that learns a user's style from a visual taste test and inspiration images, then helps them find matching products across supported shopping sites. A companion Chrome extension brings that taste profile into everyday browsing.
@@ -74,8 +81,13 @@ are managed by Supabase, not application tables or a local account file.
 The taste test has five guided stages and twenty questions, including optional
 current city/region and country. Choices, custom Other answers, names, and
 location autosave through `/api/onboarding`; Back/Continue also save the
-current position. Completed users see a saved-state placeholder at `/dashboard`
-and can edit their answers without starting over. There is no style analysis yet.
+current position. Completed users see their taste dashboard at `/dashboard`,
+with their original preferences, private inspiration gallery, and actual Gemini
+insights. Evidence links connect interpretations to their source images.
+Users can edit preferences, manage inspirations, and explicitly generate or
+regenerate analysis. Loading the dashboard never triggers a model request.
+See [dashboard behavior](docs/DASHBOARD.md) and
+[analysis endpoints and setup](docs/ANALYSIS.md).
 
 The final stage requires **5–10 inspiration images** (JPG/JPEG, PNG, WebP;
 10 MB per file). It supports browsing, drag-and-drop, progress, retry, removal,
@@ -102,7 +114,8 @@ from `backend/`. See [setup](docs/SETUP.md) and
 frontend/
   src/
     App.jsx                  # Landing and protected page routing
-    components/TasteTest.jsx  # Guided questionnaire and saved placeholder
+    components/TasteTest.jsx  # Guided questionnaire and saved edits
+    components/TasteDashboard.jsx # Saved preferences, Gemini insights, inspirations
     components/InspirationUploader.jsx # Private upload gallery
     components/AuthProvider.jsx
     lib/supabase.js          # Supabase client and authenticated API requests
@@ -139,14 +152,21 @@ require your configured Supabase project. Automated backend tests use a
 mocked Supabase service and a temporary SQLite database.
 
 **Other features:** the responsive landing page, navigation, FAQs, and
-collage are implemented. The taste questionnaire and inspiration uploads are implemented. The extension,
-AI Style DNA, and retailer integrations remain planned or illustrative.
+collage are implemented, along with the taste questionnaire, private inspiration
+uploads, Gemini analysis, taste dashboard, and explicit Qloo brand enrichment.
+Qloo needs a backend API key and migration `0004_qloo_enrichment`; see the
+[enrichment guide](docs/QLOO_ENRICHMENT.md). Product search, loaded-page ranking,
+Qloo discovery, product corrections, save-only snapshots, and saving are implemented in the
+[downloadable Chrome/Edge extension](docs/EXTENSION.md). The website's discovery
+page shows Qloo brands and saved product bookmarks.
+
 
 ## Product journey
 
 ```text
 Landing page → Sign in → Taste test + inspiration images
-            → Style DNA dashboard → Describe what to shop for
+            → Style DNA dashboard → Discovery page (/explore)
+            → Describe what to shop for
             → Choose retailers → Personalized product results
             → Open product on retailer's website
 
@@ -167,32 +187,31 @@ Muselly analyzes the selected images and answers to generate an editable **Style
 - **Taste graph:** visual connections between saved inspirations and supported style/brand affinities.
 - **Inspiration library:** uploaded and saved images, with options to remove or organize them.
 - **Taste analyzer:** explanations of recurring preferences and why suggested items fit.
-- **Shopping search:** a natural-language prompt and saved searches/results.
+- **Discovery page:** `/explore` contains Qloo brand discovery, a natural-language search prompt, editable filters, and current product results. The home-page search before “How it works” opens it. Saving searches/products remains future work.
 
 The user can update their preferences at any time; the profile evolves as they add or remove inspirations.
 
-### 3. AI-powered product search
+### 3. Product search in the extension
 
-1. User asks: **“Find me a farewell dress under ₹3,000.”**
-2. Muselly extracts the occasion, item category, budget, and other constraints.
-3. User chooses supported retailers (for example, Amazon, Flipkart, Meesho, Myntra, AJIO, Urbanic, or Savana).
-4. The shopping agent retrieves available candidate products from integrated product sources, then ranks them using visual fit, taste affinity, and user constraints.
-5. Results appear as **product cards on the Muselly dashboard**: image, title, price, retailer, taste-match estimate, and **Why it matches** explanation.
-6. Clicking **View product** opens the original retailer listing; Muselly does not handle checkout.
+Write a prompt such as **midi dress under 2000** in the extension side panel,
+open a retailer, and rank the loaded products against your saved taste and Qloo
+brand affinities. Results, prices, grounded explanations, and product links appear
+in the panel. Product prompts and cards are no longer mounted on the website.
 
-**Important:** Retailer support depends on lawful, reliable product-data access. The MVP should integrate one or two working sources first, not promise complete catalogs across every site.
+### 4. Chrome / Edge extension
 
-### 4. Chrome extension
+**Get Extension** downloads a Manifest V3 ZIP from `/api/extension/download`.
+Extract it, enable Developer mode at `chrome://extensions`, choose **Load
+unpacked**, pin Muselly, and connect your signed-in account from its side panel.
+The installation page is `/extension`; this is not a published store listing.
 
-The extension uses the same signed-in profile and supports three actions while the user browses supported sites:
+- **Search and rank:** prompt-based retailer links and personalized ranking of loaded products.
+- **Take snapshot:** visible-tab capture, preview, and crop; image upload is also supported.
+- **Discover my style:** Qloo-led brand discovery, personalized page ranking, and persistent product corrections. Snapshots only save inspirations.
+- **Save to Muselly:** private product bookmarks in Saved finds, or snapshot uploads to the inspiration library.
 
-| Action | Behavior |
-| --- | --- |
-| **Find similar** | Analyze a selected outfit/product and show similar options in the extension panel or Muselly dashboard. |
-| **Filter by my taste** | Score and highlight products visible on a supported retailer's results page; optionally dim weaker matches. |
-| **Save to Muselly** | Save a selected image or product to the inspiration library for future recommendations. |
-
-The extension is a **browsing companion**, not a separate shopping account. Page filtering requires site-specific support and does not search a retailer's entire inventory.
+See [setup, permissions, API, verification, and practical limits](docs/EXTENSION.md).
+Retailer page layouts can change; stock and sizes need confirmation at the store.
 
 ### 5. AI and Qloo responsibilities
 

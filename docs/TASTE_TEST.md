@@ -1,9 +1,12 @@
 # Taste test implementation
 
 The implemented scope is questionnaire input, image choices, private uploads,
-validation, draft persistence, and onboarding completion. Gemini, Qloo, image
-analysis, recommendations, and the final Style DNA dashboard are absent.
-`/dashboard` is an explicitly labelled saved-state placeholder.
+validation, draft persistence, and onboarding completion. A separate
+[backend-only Gemini analysis API](ANALYSIS.md) is now available on explicit
+request. The [taste dashboard](DASHBOARD.md) displays those results alongside
+saved preferences and private inspirations. Qloo brand enrichment now has a
+separate [dashboard/API flow](QLOO_ENRICHMENT.md); product recommendations
+remain future work.
 
 ## Files
 
@@ -26,7 +29,7 @@ analysis, recommendations, and the final Style DNA dashboard are absent.
 - `frontend/src/lib/draftQueue.js`: serialized background saves that retain
   the latest complete pending draft, coalescing superseded writes.
 - `frontend/src/App.jsx`, `lib/navigation.js`, `lib/supabase.js`: protected
-  routing, placeholder navigation, authenticated binary reads and uploads.
+  routing, dashboard navigation, authenticated binary reads and uploads.
   Authentication components and sign-in behavior are unchanged.
 - `backend/app/onboarding.py`: authenticated endpoints and backend validation.
 - `backend/app/models.py`, `config.py`, `main.py`, and

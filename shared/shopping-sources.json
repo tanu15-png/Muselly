@@ -1,0 +1,84 @@
+[
+  {
+    "id": "avia",
+    "name": "AVIA",
+    "kind": "brand",
+    "website": "https://avia.com",
+    "shop": "avia-com.myshopify.com",
+    "qloo_entity_id": "44751a02-9e23-4419-adc6-68411b7e028f"
+  },
+  {
+    "id": "prabal-gurung",
+    "name": "Prabal Gurung",
+    "kind": "brand",
+    "website": "https://prabalgurung.com",
+    "shop": "prabalgurung.myshopify.com",
+    "qloo_entity_id": "74c5be5a-65ff-4b51-8484-6b8552e5e3ae"
+  },
+  {
+    "id": "sachin-babi",
+    "name": "Sachin & Babi",
+    "kind": "brand",
+    "website": "https://www.sachinandbabi.com",
+    "shop": "sachinandbabi.myshopify.com",
+    "qloo_entity_id": "51033559-d4ee-4e34-8420-cebdc5930e6c"
+  },
+  {
+    "id": "marchesa",
+    "name": "Marchesa",
+    "kind": "brand",
+    "website": "https://www.marchesa.com",
+    "shop": "pmmpuw-n0.myshopify.com",
+    "qloo_entity_id": "9c8387a5-24b8-4348-a72a-b414cda8c2ab"
+  },
+  {
+    "id": "shein",
+    "name": "SHEIN",
+    "kind": "retailer",
+    "website": "https://www.sheinindia.in",
+    "search_path": "/search/",
+    "query_key": "text"
+  },
+  {
+    "id": "myntra",
+    "name": "Myntra",
+    "kind": "retailer",
+    "website": "https://www.myntra.com",
+    "search_path": "/{query_slug}"
+  },
+  {
+    "id": "ajio",
+    "name": "AJIO",
+    "kind": "retailer",
+    "website": "https://www.ajio.com",
+    "search_path": "/search/",
+    "query_key": "text"
+  },
+  {
+    "id": "amazon-fashion",
+    "name": "Amazon Fashion",
+    "kind": "retailer",
+    "website": "https://www.amazon.in",
+    "search_path": "/s",
+    "query_key": "k",
+    "extra_query": {
+      "i": "apparel"
+    }
+  },
+  {
+    "id": "flipkart",
+    "name": "Flipkart",
+    "kind": "retailer",
+    "website": "https://www.flipkart.com",
+    "search_path": "/search",
+    "query_key": "q"
+  },
+  {
+    "id": "nykaa-fashion",
+    "name": "Nykaa Fashion",
+    "kind": "retailer",
+    "website": "https://www.nykaafashion.com",
+    "search_path": "/catalogsearch/result/",
+    "query_key": "q"
+  }
+]

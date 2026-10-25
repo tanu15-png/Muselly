@@ -1,0 +1,24 @@
+.discover-entry { padding-top: 56px; padding-bottom: 28px; }
+.discover-entry-card { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(24px, 5vw, 64px); align-items: center; padding: clamp(24px, 5vw, 56px); }
+.discover-entry h2 { margin: 16px 0; }
+.discover-entry p { max-width: 430px; }
+.discover-entry form label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.discover-query-row { display: flex; gap: 12px; margin-bottom: 20px; }
+.discover-query-row input { flex: 1; min-width: 0; width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; color: var(--ink); background: var(--surface); font: inherit; }
+.discover-query-row .button { flex-shrink: 0; }
+.discover-entry-note { font-size: 12px; margin-top: 18px; }
+.explore-intro { padding: 28px 0 12px; max-width: 650px; }
+.explore-intro h1 { font-size: clamp(44px, 6vw, 76px); line-height: 1.05; margin: 20px 0; }
+.explore-brands { scroll-margin-top: 100px; }
+.explore-sign-in-note { padding-top: 20px; }
+.extension-setup h1 { white-space: pre-line; font-size: clamp(36px, 5vw, 60px); }
+.extension-guide { padding: 28px; margin-top: 28px; }
+.extension-setup li { margin: 12px 0; line-height: 1.7; }
+.saved-finds-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.saved-find { padding: 20px; min-width: 0; }
+.saved-find img { width: 100%; height: 220px; object-fit: contain; }
+.saved-find h3 { font-size: 18px; overflow-wrap: anywhere; }
+.explore-intro > .text-link { margin-left: 18px; }
+@media (max-width: 700px) { .saved-finds-grid { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .discover-entry-card { grid-template-columns: 1fr; } }
+@media (max-width: 540px) { .discover-query-row { flex-direction: column; } .discover-entry { padding-top: 32px; } }

@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { clearCache } from '../lib/sessionCache';
+import { clearSavedSearches } from '../lib/savedSearch';
 
 const AuthContext = createContext(null);
 
@@ -16,7 +18,7 @@ export function AuthProvider({ children }) {
       if (active) {
         setSession(nextSession);
         setInitialized(true);
-        if (event === 'SIGNED_OUT') setAuth({ status: 'signed-out', user: null, error: '' });
+        if (event === 'SIGNED_OUT') { clearCache(); clearSavedSearches(); setAuth({ status: 'signed-out', user: null, error: '' }); }
       }
     });
     supabase.auth.getSession().then(({ data, error }) => {
@@ -32,8 +34,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (!supabase || !initialized) return;
-    if (!session) { setAuth(previous => ({ status: 'signed-out', user: null, error: previous.error })); return; }
+    if (!session) { clearCache(); setAuth(previous => ({ status: 'signed-out', user: null, error: previous.error })); return; }
     const controller = new AbortController();
+    const timer = window.setTimeout(() => {
+      controller.abort();
+      setAuth({ status: 'error', user: null, error: 'Sign-in verification timed out. Check that the Python backend is running, then try again.' });
+    }, 15000);
     setAuth({ status: 'loading', user: null, error: '' });
     fetch('/api/auth/me', { signal: controller.signal, cache: 'no-store', headers: { Authorization: `Bearer ${session.access_token}` } })
       .then(async response => {
@@ -50,9 +56,10 @@ export function AuthProvider({ children }) {
       })
       .catch(error => {
         if (!controller.signal.aborted) setAuth({ status: error.status === 401 ? 'signed-out' : 'error', user: null, error: error.message });
-      });
-    return () => controller.abort();
-  }, [session, initialized, revision]);
+      })
+      .finally(() => window.clearTimeout(timer));
+    return () => { window.clearTimeout(timer); controller.abort(); };
+  }, [session?.access_token, initialized, revision]);
 
   // A changed token immediately hides protected content while verification runs.
   const current = auth.status === 'signed-in' && (!session || auth.token !== session.access_token)

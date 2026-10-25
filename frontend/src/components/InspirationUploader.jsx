@@ -3,23 +3,21 @@ import { Check, ImagePlus, LockKeyhole, RefreshCw, Trash2 } from 'lucide-react';
 import { apiRequest, uploadInspiration } from '../lib/supabase';
 import { validateFile } from './taste';
 import { Button } from './ui';
+import { acquirePrivateImage } from '../lib/privateImages';
 
-export function PrivateImage({ image, refresh = 0 }) {
+export function PrivateImage({ image, refresh = 0, retryable = true }) {
   const [url, setUrl] = useState('');
-  const [error, setError] = useState(false);
+  const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
   useEffect(() => {
-    const controller = new AbortController();
-    let objectUrl;
-    setUrl(''); setError(false);
-    apiRequest(`/api/onboarding/images/${image.id}`, { blob: true, signal: controller.signal }).then(blob => {
-      if (controller.signal.aborted) return;
-      objectUrl = URL.createObjectURL(blob);
-      setUrl(objectUrl);
-    }).catch(() => { if (!controller.signal.aborted) setError(true); });
-    return () => { controller.abort(); if (objectUrl) URL.revokeObjectURL(objectUrl); };
+    let active = true;
+    setUrl(''); setError('');
+    const preview = acquirePrivateImage({ ...image, updated_at: `${image.updated_at || ""}:${refresh}:${retry}` });
+    preview.promise.then(url => { if (active) setUrl(url); })
+      .catch(failure => { if (active) setError(failure.message || 'The image could not be downloaded. Please retry.'); });
+    return () => { active = false; preview.release(); };
   }, [image.id, image.updated_at, refresh, retry]);
-  return url ? <img src={url} alt={image.filename} /> : <div className="image-loading">{error ? <><span>Preview unavailable</span><button type="button" onClick={() => setRetry(value => value + 1)}>Retry preview</button></> : <span role="status">Loading image…</span>}</div>;
+  return url && !error ? <img src={url} alt={image.filename} onError={() => setError('This preview could not be displayed. Retry to download it again.')} /> : <div className="image-loading">{error ? <><span>Preview unavailable</span><span role="alert">{error}</span>{retryable && <button type="button" onClick={() => setRetry(value => value + 1)}>Retry preview</button>}</> : <span role="status">Loading image…</span>}</div>;
 }
 
 export default function InspirationUploader({ initialImages, onChange, disabled = false }) {

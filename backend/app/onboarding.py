@@ -4,6 +4,7 @@ import binascii
 from datetime import datetime, timezone
 from io import BytesIO
 import json
+import logging
 from pathlib import Path
 from uuid import UUID, uuid4
 import warnings
@@ -28,6 +29,7 @@ BUCKET = 'muselly-inspirations'
 LIMIT = 10 * 1024 * 1024
 Image.MAX_IMAGE_PIXELS = 25_000_000
 router = APIRouter(prefix='/api/onboarding', tags=['Taste test'])
+logger = logging.getLogger(__name__)
 
 
 class Answer(BaseModel):
@@ -130,16 +132,26 @@ def storage(request, method, path, **kwargs):
     storage_headers = {'apikey': key}
     if not key.startswith('sb_secret_'):
         storage_headers['Authorization'] = f'Bearer {key}'
-    try:
-        response = request.app.state.storage_client.request(method,
-            f'{settings.supabase_url.rstrip("/")}/storage/v1/{path}',
-            headers={**storage_headers, **kwargs.pop('headers', {})},
-            timeout=60, **kwargs)
-    except httpx.RequestError:
-        raise HTTPException(503, 'Image storage could not be reached. Please retry.') from None
-    if response.is_error:
-        raise HTTPException(503, 'Unable to save or retrieve this image. Please retry.')
-    return response
+    headers = {**storage_headers, **kwargs.pop('headers', {})}
+    # A dropped pooled connection or brief provider outage should not make a
+    # saved preview disappear. Only retry safe reads, never ambiguous writes.
+    attempts = 2 if method == 'GET' else 1
+    for attempt in range(attempts):
+        try:
+            response = request.app.state.storage_client.request(method,
+                f'{settings.supabase_url.rstrip("/")}/storage/v1/{path}',
+                headers=headers, timeout=httpx.Timeout(20, connect=8, pool=8) if method == 'GET' else 60, **kwargs)
+        except httpx.RequestError as failure:
+            if attempt + 1 < attempts: continue
+            logger.warning('Private image storage %s failed: %s', method, type(failure).__name__)
+            detail = 'Image storage timed out. Please retry.' if isinstance(failure, httpx.TimeoutException) else 'Image storage could not be reached. Please retry.'
+            raise HTTPException(503, detail) from None
+        if response.status_code in (502, 503, 504) and attempt + 1 < attempts:
+            continue
+        if response.is_error:
+            logger.warning('Private image storage %s returned HTTP %s', method, response.status_code)
+            raise HTTPException(503, 'Unable to save or retrieve this image. Please retry.')
+        return response
 
 
 @router.get('')

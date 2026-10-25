@@ -137,6 +137,26 @@ def test_upload_validation_storage_failure_retry_replacement_and_removal(client)
     assert client.get(f'/api/onboarding/images/{id}', headers=headers()).status_code == 404
 
 
+def test_preview_recovers_from_one_temporary_storage_failure(client):
+    result = upload(client)
+    assert result.status_code == 200
+    client.storage_failures.append(True)
+    response = client.get('/api/onboarding/images/' + result.json()['id'], headers=headers())
+    assert response.status_code == 200
+    assert response.content == next(iter(client.storage_objects.values()))
+
+
+def test_preview_stops_after_two_failed_reads_and_preserves_the_saved_image(client):
+    result = upload(client)
+    client.storage_failures.extend([True, True])
+    path = '/api/onboarding/images/' + result.json()['id']
+    response = client.get(path, headers=headers())
+    assert response.status_code == 503
+    assert response.json()['detail'] == 'Unable to save or retrieve this image. Please retry.'
+    assert len(client.storage_objects) == 1
+    assert client.get(path, headers=headers()).status_code == 200
+
+
 @pytest.mark.parametrize('format,type,name', [('JPEG','image/jpeg','photo.jpeg'), ('PNG','image/png','photo.png'), ('WEBP','image/webp','photo.webp')])
 def test_supported_image_types(client, format, type, name):
     assert upload(client, data=image_bytes(format), type=type, name=name).status_code == 200
@@ -223,3 +243,14 @@ def test_legacy_anon_key_cannot_be_used_for_private_storage(client):
     assert result.status_code == 503
     assert 'public/anon' in result.json()['detail']
     assert not client.storage_calls
+
+
+def test_saved_retailer_choices_keep_their_original_meaning():
+    from app.onboarding import Draft
+    from app.analysis import labeled_answers
+
+    # Old stored option IDs must never be reassigned to the new destinations.
+    answers = {'q16': {'choices': ['o5', 'o6', 'o7']}}
+    Draft(answers=answers)
+    assert labeled_answers(answers)[0]['choices'] == ['Meesho', 'Urbanic', 'Savana']
+    Draft(answers={'q16': {'choices': ['o8', 'o9']}})

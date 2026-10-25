@@ -15,7 +15,7 @@ export function ProgressIndicator({ position }) {
   return <div className="quiz-progress"><div className="quiz-progress-summary"><span>Stage {stage + 1} of 5 <strong>{stages[stage]}</strong></span><span>{progress}%</span></div><div role="progressbar" aria-label="Taste test progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="quiz-progress-track"><span style={{ width: `${progress}%` }} /></div><ol className="quiz-stages">{stages.map((name, index) => <li key={name} aria-current={index === stage ? 'step' : undefined} className={index <= stage ? 'is-active' : ''}><span>{index < stage ? <Check size={13} aria-hidden="true" /> : index + 1}</span>{name}</li>)}</ol></div>;
 }
 
-export default function TasteTest({ header }) {
+export default function TasteTest({ header, redirectCompleted = false }) {
   const [answers, setAnswers] = useState({});
   const [position, setPosition] = useState(0);
   const [images, setImages] = useState([]);
@@ -58,12 +58,21 @@ export default function TasteTest({ header }) {
     apiRequest('/api/onboarding', { signal: controller.signal }).then(data => {
       if (controller.signal.aborted) return;
       setAnswers(data.answers); setPosition(data.position); setImages(data.images);
-      setCompleted(Boolean(data.completed_at)); ready.current = true;
+      const params = new URLSearchParams(window.location.search);
+      const edit = params.get('edit') === '1';
+      setCompleted(Boolean(data.completed_at) && !edit);
+      setEditing(edit);
+      if (edit) {
+        const questionIndex = questions.findIndex(question => question.id === params.get('question'));
+        setPosition(params.get('step') === 'inspirations' ? questions.length : Math.max(0, questionIndex));
+      }
+      if (redirectCompleted && data.completed_at && !edit) openStylePlaceholder();
+      ready.current = true;
     }).catch(failure => {
       if (!controller.signal.aborted) { setError(failure.message); setLoadFailed(true); }
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => { controller.abort(); clearTimeout(timer.current); };
-  }, [revision]);
+  }, [revision, redirectCompleted]);
 
   const persist = useCallback((nextAnswers, nextPosition) => {
     clearTimeout(timer.current);
@@ -125,7 +134,7 @@ export default function TasteTest({ header }) {
 
   if (loading || loadFailed) return <>{header}<main id="main-content" className="quiz-page container"><p role={loadFailed ? 'alert' : 'status'}>{loading ? 'Opening your style story…' : error}</p>{loadFailed && <Button onClick={() => setRevision(value => value + 1)}><RefreshCw size={17} /> Try again</Button>}</main></>;
 
-  if (completed) return <>{header}<main id="main-content" className="quiz-page quiz-complete container"><span className="result-icon"><Check size={26} /></span><Eyebrow>Your taste test is saved</Eyebrow><h1 tabIndex={-1} ref={heading}>Your Style DNA<br />is <em>coming next.</em></h1><p>Your answers and {images.length} inspiration images are safely saved to your account. Style analysis hasn’t been added yet. Come back anytime to refine what inspires you.</p><div className="entry-actions"><Button onClick={() => { setCompleted(false); setEditing(true); setPosition(0); setError(''); }} variant="secondary">Edit my taste test <ArrowRight size={17} /></Button><Button href="/">Explore Muselly <ArrowRight size={17} /></Button></div></main></>;
+  if (completed) return <>{header}<main id="main-content" className="quiz-page quiz-complete container"><span className="result-icon"><Check size={26} /></span><Eyebrow>Your style story continues</Eyebrow><h1 tabIndex={-1} ref={heading}>Your taste test<br />is <em>saved.</em></h1><p>Your answers and {images.length} inspiration images are safely saved to your account. Explore your style profile or come back anytime to refine what inspires you.</p><div className="entry-actions"><Button href="/dashboard">View my Style DNA <ArrowRight size={17} /></Button><Button onClick={() => { setCompleted(false); setEditing(true); setPosition(0); setError(''); }} variant="secondary">Edit my taste test <ArrowRight size={17} /></Button></div></main></>;
 
   return <>{header}<main id="main-content" className="quiz-page container">
     <ProgressIndicator position={position} />

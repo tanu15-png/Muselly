@@ -1,0 +1,356 @@
+{
+  "music_tags": [
+    {
+      "id": "urn:tag:genre:music:k_pop",
+      "name": "K Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:kpop",
+      "name": "Kpop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:k_pop_star",
+      "name": "K-pop Star",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:not_k_pop",
+      "name": "Not K-pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:king_pop",
+      "name": "King Of Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:korean_pop",
+      "name": "Korean Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:kazakh_pop",
+      "name": "Kazakh Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:kurdish_pop",
+      "name": "Kurdish Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:oldskool_k_pop",
+      "name": "Oldskool K-pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:korean_indie_pop",
+      "name": "Korean Indie Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:kayou_pops",
+      "name": "Kayou-pops",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:pop",
+      "name": "Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:indie_pop",
+      "name": "Indie Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:synth_pop",
+      "name": "Synth Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:j_pop",
+      "name": "J -pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:pop_rock",
+      "name": "Pop - Rock",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:pop_punk",
+      "name": "Pop - Punk",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:dream_pop",
+      "name": "Dream Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:power_pop",
+      "name": "Power Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:russian_pop",
+      "name": "Russian Pop",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:bollywood",
+      "name": "Bollywood",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:bollywood_soundtracks",
+      "name": "Bollywood Soundtracks",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:bollywood_film",
+      "name": "Bollywood Film",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    },
+    {
+      "id": "urn:tag:genre:music:bollywood_funk",
+      "name": "Bollywood Funk",
+      "type": "urn:tag:genre:music",
+      "parents": [
+        {
+          "type": "urn:entity:artist"
+        },
+        {
+          "type": "urn:entity:album"
+        }
+      ]
+    }
+  ],
+  "fashion_entities": [
+    {
+      "entity_id": "B7C87E29-85BF-47B3-B023-D18253E8D03C",
+      "name": "Robert Naorem",
+      "type": "urn:entity",
+      "subtype": "urn:entity:brand",
+      "query": {
+        "affinity": 0.9962993797984933,
+        "measurements": {
+          "audience_growth": 0
+        }
+      },
+      "tags": [
+        {
+          "id": "urn:tag:genre:brand:fashion",
+          "name": "Fashion",
+          "type": "urn:tag:genre:brand"
+        }
+      ]
+    },
+    {
+      "entity_id": "44751A02-9E23-4419-ADC6-68411B7E028F",
+      "name": "AVIA",
+      "type": "urn:entity",
+      "subtype": "urn:entity:brand",
+      "query": {
+        "affinity": 0.9922542896767478,
+        "measurements": {
+          "audience_growth": 0
+        }
+      },
+      "tags": [
+        {
+          "id": "urn:tag:genre:brand:fashion",
+          "name": "Fashion",
+          "type": "urn:tag:genre:brand"
+        }
+      ]
+    }
+  ]
+}

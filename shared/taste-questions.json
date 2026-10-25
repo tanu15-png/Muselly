@@ -324,7 +324,7 @@
   {
     "id": "q8",
     "stage": 1,
-    "title": "Which movies, shows, celebrities, or artists inspire your style?",
+    "title": "Which films, shows, books or artists inspire you?",
     "options": [],
     "multi": false,
     "optional": true,
@@ -707,6 +707,10 @@
     "title": "Where do you usually shop online?",
     "options": [
       {
+        "id": "o8",
+        "label": "SHEIN"
+      },
+      {
         "id": "o1",
         "label": "Myntra"
       },
@@ -716,27 +720,34 @@
       },
       {
         "id": "o3",
-        "label": "Amazon"
+        "label": "Amazon Fashion"
       },
       {
         "id": "o4",
         "label": "Flipkart"
       },
       {
-        "id": "o5",
-        "label": "Meesho"
-      },
-      {
-        "id": "o6",
-        "label": "Urbanic"
-      },
-      {
-        "id": "o7",
-        "label": "Savana"
+        "id": "o9",
+        "label": "Nykaa Fashion"
       },
       {
         "id": "other",
         "label": "Other"
+      },
+      {
+        "id": "o5",
+        "label": "Meesho",
+        "retired": true
+      },
+      {
+        "id": "o6",
+        "label": "Urbanic",
+        "retired": true
+      },
+      {
+        "id": "o7",
+        "label": "Savana",
+        "retired": true
       }
     ],
     "multi": true,

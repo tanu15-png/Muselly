@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Muselly</title><link rel="stylesheet" href="panel.css"></head>
+<body>
+<main>
+<div id="feedback"><p id="status" role="status" aria-live="polite"></p><p id="error" role="alert" hidden></p></div>
+<section class="companion">
+<header><a id="home" target="_blank" rel="noopener noreferrer" class="brand">muselly</a><p class="eyebrow">Your taste, wherever you shop</p></header>
+<h1>Discover my style.</h1><p>Discover brands through your interests. Help us get closer with every correction.</p>
+</section>
+<details id="shopping-tools" open><summary>Shop your taste</summary><section>
+<form id="search-form"><label for="query">What are you shopping for?</label><textarea id="query" rows="2" maxlength="300" required minlength="2" placeholder="A dress for a party under ₹2,000"></textarea>
+<button type="submit">Discover brands &amp; shop</button></form>
+<div class="actions"><button id="refresh-brands" class="secondary">Update my Qloo discoveries</button><button id="explore" class="secondary">Explore beyond my usual style</button></div>
+<p id="brand-status" class="note" role="status">Discoveries use your saved taste and interests.</p>
+<div id="stores" class="store-links"></div>
+<details><summary>Store access</summary><label for="access-store">Which store are you shopping on?</label><select id="access-store"><option value="https://*.myntra.com/*">Myntra</option><option value="https://*.amazon.in/*">Amazon India</option><option value="https://*.ajio.com/*">AJIO</option><option value="https://*.flipkart.com/*">Flipkart</option><option value="https://*.nykaafashion.com/*">Nykaa Fashion</option><option value="https://*.sheinindia.in/*">SHEIN India</option><option value="https://*.shein.com/*">SHEIN</option><option value="https://*.avia.com/*">AVIA</option><option value="https://*.prabalgurung.com/*">Prabal Gurung</option><option value="https://*.sachinandbabi.com/*">Sachin & Babi</option><option value="https://*.marchesa.com/*">Marchesa</option></select><button id="allow-store" class="secondary">Allow this store</button><p id="access-status" class="note" role="status">Allow access to your selected store so Muselly can read products when you ask. You can revoke access in your browser’s extension settings.</p></details>
+<button id="rank">Find my favorites on this page</button><p class="note">Open a retailer search in the active tab. Click its Muselly toolbar icon, or use Store access above, then find your favorites. Only loaded products are ranked. Scroll the store to load more.</p>
+</section><section><h2>Your shortlist</h2><p class="note">Corrections are saved for future shopping. Shape and color feedback uses listed product details. You can reset corrections below.</p><button id="clear-feedback" class="quiet">Reset my corrections</button><p id="result-summary" class="note" role="status"></p><div id="results"></div></section></details>
+<details><summary>Save an inspiration</summary><section>
+<div class="inspiration"><div id="inspiration-preview" class="inspiration-preview" aria-hidden="true"><svg viewBox="0 0 48 64"><path d="M12 12h24v40H12z" fill="none" stroke="currentColor"/></svg></div><div><p class="eyebrow">Your inspiration library</p><p id="inspiration-copy">Keep a look for your Style DNA.</p></div></div>
+<div class="actions"><button id="capture" class="secondary">Take snapshot</button><label class="file-label">Upload an image<input id="upload" type="file" accept="image/png,image/jpeg,image/webp"></label></div>
+<div id="snapshot-area" hidden><div class="snapshot-preview"><canvas id="snapshot" aria-label="Inspiration preview; drag to crop" tabindex="0"></canvas><div id="crop-selection" hidden></div></div><button id="reset-crop" class="quiet">Reset crop</button></div>
+<button id="save-snapshot">Save inspiration to Muselly</button><p class="note">Snapshots only save inspirations. Update your Style DNA analysis on Muselly when you want saved images included in your taste profile.</p><p id="snapshot-status" role="status"></p>
+</section></details>
+<details><summary>Your saved products <span aria-hidden="true">♡</span></summary><section><button id="load-saved" class="secondary">Reload saved products</button><div id="saved"></div></section></details>
+<details class="account-settings"><summary>Your Muselly account</summary><section class="account"><p id="account" role="status">Checking your connection…</p><button id="connect">Connect Muselly</button><button id="disconnect" class="quiet" hidden>Disconnect</button></section></details>
+<footer><a id="profile" target="_blank" rel="noopener noreferrer">My Style DNA ↗</a><a id="brands" target="_blank" rel="noopener noreferrer">Explore brands ↗</a></footer>
+</main><script type="module" src="panel.js"></script>
+</body></html>

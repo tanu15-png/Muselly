@@ -33,4 +33,11 @@
   --palette-brown: #735642;
   --palette-burgundy: #754451;
   --palette-blue: #A7B6C9;
+  /* Approximate named swatches for colors observed in inspiration images. */
+  --color-navy: #27384E;
+  --color-peach: #EBC5B5;
+  --color-yellow: #EFE0A4;
+  --color-lavender: #C8BBD8;
+  --color-orange: #C88D65;
+  --color-gold: #BEA16E;
 }

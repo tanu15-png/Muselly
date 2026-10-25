@@ -161,6 +161,14 @@ The frontend sends `/api` requests through
 Vite to Python on port 8000. Use the exact same origin you configured
 in Supabase and `APP_ORIGIN`.
 
+If the terminal reports `Stopped` after Ctrl+Z, the backend is suspended
+and still holds port 8000. Run `jobs -l` in that same terminal and resume
+the backend with `fg %1` (use the job number shown by `jobs`). To stop it
+and free the port, press Ctrl+C once it is in the foreground. Then run
+the Uvicorn command again. Ctrl+Z suspends the server; Ctrl+C stops it.
+Check `http://127.0.0.1:8000/api/health` for `{"status":"ok"}` before
+retrying sign-in. Sign-in verification requires the Python backend.
+
 ## 7. Check the user flow
 
 1. Select **Get started** or **Sign in** on the landing page.
@@ -177,8 +185,10 @@ in Supabase and `APP_ORIGIN`.
    and current question return. Back must preserve choices.
 6. Add 5–10 valid images. Test retry, replacement, removal, invalid files,
    oversized files, and the ten-image cap. Fewer than five must block finishing.
-7. Finish and check the saved `/dashboard` placeholder. Revisit `/taste-test`
-   to edit; existing answers and images must return. No analysis runs.
+7. Finish and check `/dashboard`. Saved preferences and inspirations should
+   appear; any existing successful analysis should load. Use “Discover my style”
+   to generate missing insights explicitly. Edit preferences or manage
+   inspirations from the dashboard; existing answers and images must return.
 8. Sign out and test `/taste-test` and `/dashboard`: both must return to
    `/sign-in`. With two accounts, verify that neither can fetch, replace, or
    remove the other's image IDs through the API.
@@ -221,3 +231,61 @@ opens `/taste-test` without another sign-in. Existing unconfirmed users
 who try email sign-in are shown the confirmation/resend screen as well.
 
 See [Supabase SMTP documentation](https://supabase.com/docs/guides/auth/auth-smtp).
+
+## Backend-only Gemini analysis
+
+Set `GEMINI_API_KEY` and optionally `GEMINI_MODEL` in `backend/.env`, run
+`uv run alembic upgrade head`, and restart the backend. These variables must
+never be added to frontend environment files. The explicit authenticated
+`POST /api/onboarding/analysis` analyzes saved answers and 5–10 private images;
+`GET /api/onboarding/analysis` reads the saved JSON without another model call.
+The dashboard displays saved analysis and offers explicit generation and
+regeneration actions. Loading it does not make a model request.
+
+See [analysis setup, endpoints, and response fields](ANALYSIS.md) for curl,
+Swagger authentication, model selection, and the server-operator CLI.
+
+## Qloo brand enrichment
+
+See [the enrichment guide](QLOO_ENRICHMENT.md). Add `QLOO_API_KEY` and the
+provisioned `QLOO_BASE_URL` to `backend/.env` only, apply
+`uv run alembic upgrade head` (revision `0004_qloo_enrichment`), and restart
+Uvicorn. Run `uv run python -m app.check_qloo` to verify live access and
+coverage without sending private user profiles. Completed users can explicitly
+enrich or refresh affinities on the dashboard; page loads never generate them.
+
+## Product search
+
+The discovery page at `/explore` connects four public Qloo brand catalogs through Shopify's
+tokenless Storefront API. No new key, dependency, or database migration is
+needed for search. Existing Supabase authentication is required. Python needs
+outbound HTTPS access to the four fixed stores and the ECB currency feed.
+The six major retailers open search links until product feeds are available.
+See [coverage, API, filters, ranking, and checks](PRODUCT_SEARCH.md).
+
+## Browser extension
+
+Apply migration `0005_extension_saved` using `uv run alembic upgrade head`.
+**Get Extension** downloads the development ZIP; extract it and load unpacked
+through Chrome/Edge's extensions page. Keep `APP_ORIGIN` equal to the website
+origin that serves/proxies `/api`, then connect the installed extension from its
+side panel. No new retailer key is required. Snapshot saving reuses private
+Storage credentials; Find similar reuses the backend Gemini configuration.
+The website now focuses on taste and Qloo brands; product search/ranking is in
+the extension. See [complete installation and implementation](EXTENSION.md).
+
+## Image upload and preview errors
+
+`Application startup complete` plus `200` responses for `/api/auth/me` and
+`/api/onboarding` indicate a running backend and valid session. An analysis
+`404` means that account has no saved analysis yet. A private-image `503` is
+a separate request failure: inspect its JSON `detail`, now also shown in the
+preview error. Authentication, database access, and storage can each produce
+a different `503` message.
+
+Image storage reads retry one temporary network/502/503/504 failure, with bounded
+read/connect timeouts. Upload writes are not automatically retried. The upload
+UI distinguishes a broken connection from its two-minute client timeout and
+shows backend JSON errors when present. After a timeout, reload the saved images
+before retrying, since the original upload may still commit. Keep both servers
+running and wait for backend reload/startup to finish before uploading.

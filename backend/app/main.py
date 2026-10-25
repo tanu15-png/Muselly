@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
+import ssl
 from typing import Literal
 
 import httpx
@@ -19,6 +20,16 @@ from .config import Settings, get_settings
 from .database import get_db
 from .models import TasteProfile, UserProfile
 from .onboarding import router as onboarding_router
+from .analysis import router as analysis_router
+from .enrichment import router as enrichment_router
+from .qloo import QlooClient
+from .catalog import ProductCatalog
+from .shopping import router as shopping_router, SearchLimiter
+from .extension import router as extension_router
+from .analytics import router as analytics_router
+from .culture import router as culture_router
+from .discovery import router as discovery_router
+from .cultural_analytics import router as cultural_analytics_router
 
 Style = Literal["romantic", "classic", "casual", "chic"]
 
@@ -40,16 +51,35 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        async with httpx.AsyncClient(timeout=10, transport=auth_transport) as client:
-            with httpx.Client(timeout=60, transport=auth_transport) as storage_client:
-                app.state.storage_client = storage_client
-                app.state.auth_client = client
-                yield
+        tls = ssl.create_default_context()
+        async with httpx.AsyncClient(timeout=10, transport=auth_transport, verify=tls) as client:
+            with httpx.Client(timeout=60, transport=auth_transport, verify=tls) as storage_client:
+                with httpx.Client(timeout=120, verify=tls) as analysis_client:
+                    with httpx.Client(timeout=8, follow_redirects=False, verify=tls) as qloo_client:
+                        with httpx.Client(timeout=10, follow_redirects=False, verify=tls, headers={'User-Agent': 'Muselly/0.1 (product search)'}) as catalog_client:
+                            app.state.catalog = ProductCatalog(catalog_client)
+                            app.state.search_limiter = SearchLimiter()
+                            app.state.qloo = QlooClient(qloo_client)
+                            app.state.analysis_client = analysis_client
+                            app.state.storage_client = storage_client
+                            app.state.auth_client = client
+                            try:
+                                yield
+                            finally:
+                                app.state.catalog.close()
 
     app = FastAPI(title="Muselly API", lifespan=lifespan)
     app.state.settings = settings
     app.add_middleware(CORSMiddleware, allow_origins=[settings.app_origin], allow_methods=["GET", "PUT", "POST", "DELETE"], allow_headers=["Authorization", "Content-Type", "X-Filename"])
     app.include_router(onboarding_router)
+    app.include_router(analysis_router)
+    app.include_router(enrichment_router)
+    app.include_router(shopping_router)
+    app.include_router(extension_router)
+    app.include_router(analytics_router)
+    app.include_router(culture_router)
+    app.include_router(discovery_router)
+    app.include_router(cultural_analytics_router)
 
     @app.middleware("http")
     async def response_headers(request, call_next):
@@ -98,7 +128,7 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
 
     # The React route guard verifies bearer tokens before showing the taste UI;
     # every taste/onboarding API independently verifies authentication server-side.
-    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/auth/callback"):
+    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/explore", "/auth/callback"):
         app.add_api_route(route, entry_page, methods=["GET"], include_in_schema=False)
     for name in ("assets", "images"):
         if (public / name).is_dir():

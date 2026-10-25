@@ -18,7 +18,7 @@ export function ImageOptionCard({ option, selected, disabled, onClick }) {
 
 export function MultiSelectChips({ question, answer, onChange }) {
   return <div className={`quiz-options ${question.options.some(o => o.visual && o.visual !== 'palette') ? 'quiz-options--visual' : ''}`}>
-    {question.options.map(option => {
+    {question.options.filter(option => !option.retired || answer.choices.includes(option.id)).map(option => {
       const selected = answer.choices.includes(option.id);
       const disabled = !selected && question.multi && question.max && answer.choices.length >= question.max;
       const onClick = () => onChange(toggleChoice(question, answer, option.id));

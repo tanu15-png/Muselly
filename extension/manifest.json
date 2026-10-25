@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Muselly \u2014 shop your taste",
+  "version": "0.2.1",
+  "minimum_chrome_version": "116",
+  "description": "Discover Qloo brands, refine fashion recommendations with your feedback, and save products and inspirations to Muselly.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "http://localhost/*"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:5173/*"
+    ]
+  },
+  "background": {
+    "service_worker": "worker.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Muselly"
+  },
+  "side_panel": {
+    "default_path": "panel.html"
+  },
+  "icons": {
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "optional_host_permissions": [
+    "https://*.myntra.com/*",
+    "https://*.amazon.in/*",
+    "https://*.ajio.com/*",
+    "https://*.flipkart.com/*",
+    "https://*.nykaafashion.com/*",
+    "https://*.sheinindia.in/*",
+    "https://*.shein.com/*",
+    "https://*.avia.com/*",
+    "https://*.prabalgurung.com/*",
+    "https://*.sachinandbabi.com/*",
+    "https://*.marchesa.com/*"
+  ]
+}
