@@ -14,6 +14,11 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllGlobals());
 
+it('returns shopping sign-in to the shopping page', () => {
+  sessionStorage.setItem('muselly-explore-return', '/shop'); openTasteTest();
+  expect(window.history.replaceState).toHaveBeenCalledWith({}, '', '/shop');
+});
+
 it('returns an OAuth callback to discovery with its query and consumes the destination', () => {
   sessionStorage.setItem('muselly-explore-return', '/explore?q=midi%20dress#brand-affinities');
   openTasteTest();

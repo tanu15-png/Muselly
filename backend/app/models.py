@@ -140,7 +140,17 @@ class CulturalFeedback(Base):
     preference: Mapped[str | None] = mapped_column(String(20))
     fashion_inspiration: Mapped[bool] = mapped_column(default=False)
     reference_image_ids: Mapped[list] = mapped_column(JSON, default=list)
+    fashion_note: Mapped[str] = mapped_column(String(500), default='', server_default='')
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class ShoppingAgentSession(Base):
+    __tablename__ = 'muselly_shopping_agent_sessions'
+    id: Mapped[UUID] = mapped_column(Uuid, primary_key=True)
+    user_id: Mapped[UUID] = mapped_column(Uuid, index=True)
+    state: Mapped[dict] = mapped_column(JSON)
+    revision: Mapped[int] = mapped_column(default=1)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class CulturalSession(Base):

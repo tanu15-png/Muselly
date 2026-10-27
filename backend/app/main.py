@@ -30,6 +30,9 @@ from .analytics import router as analytics_router
 from .culture import router as culture_router
 from .discovery import router as discovery_router
 from .cultural_analytics import router as cultural_analytics_router
+from .myntra_shopping import router as myntra_shopping_router
+from .shopping_agent import router as shopping_agent_router
+from .retailer_images import RetailerImages
 
 Style = Literal["romantic", "classic", "casual", "chic"]
 
@@ -58,6 +61,7 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
                     with httpx.Client(timeout=8, follow_redirects=False, verify=tls) as qloo_client:
                         with httpx.Client(timeout=10, follow_redirects=False, verify=tls, headers={'User-Agent': 'Muselly/0.1 (product search)'}) as catalog_client:
                             app.state.catalog = ProductCatalog(catalog_client)
+                            app.state.retailer_images = RetailerImages(catalog_client)
                             app.state.search_limiter = SearchLimiter()
                             app.state.qloo = QlooClient(qloo_client)
                             app.state.analysis_client = analysis_client
@@ -70,7 +74,7 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
 
     app = FastAPI(title="Muselly API", lifespan=lifespan)
     app.state.settings = settings
-    app.add_middleware(CORSMiddleware, allow_origins=[settings.app_origin], allow_methods=["GET", "PUT", "POST", "DELETE"], allow_headers=["Authorization", "Content-Type", "X-Filename"])
+    app.add_middleware(CORSMiddleware, allow_origins=[settings.app_origin], allow_methods=["GET", "PUT", "POST", "PATCH", "DELETE"], allow_headers=["Authorization", "Content-Type", "X-Filename"])
     app.include_router(onboarding_router)
     app.include_router(analysis_router)
     app.include_router(enrichment_router)
@@ -80,6 +84,8 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
     app.include_router(culture_router)
     app.include_router(discovery_router)
     app.include_router(cultural_analytics_router)
+    app.include_router(myntra_shopping_router)
+    app.include_router(shopping_agent_router)
 
     @app.middleware("http")
     async def response_headers(request, call_next):
@@ -128,7 +134,7 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
 
     # The React route guard verifies bearer tokens before showing the taste UI;
     # every taste/onboarding API independently verifies authentication server-side.
-    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/explore", "/auth/callback"):
+    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/explore", "/shop", "/auth/callback"):
         app.add_api_route(route, entry_page, methods=["GET"], include_in_schema=False)
     for name in ("assets", "images"):
         if (public / name).is_dir():

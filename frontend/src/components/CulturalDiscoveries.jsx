@@ -5,14 +5,12 @@ import { apiRequest } from '../lib/supabase';
 import { discoveryStore, createOutboxSync } from '../lib/discoveryOutbox';
 import ResilientImage from './ResilientImage';
 import DiscoveryAnalytics from './DiscoveryAnalytics';
-import FashionReferencePicker from './FashionReferencePicker';
 
 const endpoint = '/api/onboarding/culture';
 const labels = { artist: 'Music', movie: 'Films', tv_show: 'Shows', book: 'Books' };
 const icons = { artist: Music2, movie: Film, tv_show: Tv, book: BookOpen };
 
 export default function CulturalDiscoveries({ prepareImages, onEvidence, ownerId, images = [] }) {
-  const [fashionCard, setFashionCard] = useState(null);
   const [run, setRun] = useState(null);
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
@@ -147,11 +145,10 @@ export default function CulturalDiscoveries({ prepareImages, onEvidence, ownerId
     return () => clearTimeout(timer);
   }, [failedKey, paused, starting, storageError, fetching]);
 
-  async function choose(action, referenceImageIds) {
-    if (action === 'fashion' && !referenceImageIds) { setFashionCard(card); return; }
+  async function choose(action) {
     if (localLock.current || starting || !card || storageError) return;
     localLock.current = true; setLocalSaving(true);
-    try { apply(await discoveryStore.choose(ownerId, fashionCard || card, action, referenceImageIds)); automaticBatches.current = 0; setError(''); setFashionCard(null); }
+    try { apply(await discoveryStore.choose(ownerId, card, action)); automaticBatches.current = 0; setError(''); }
     catch (failure) { setStorageError(failure.message || 'Couldn’t save on this device. Your card has not advanced.'); }
     finally { localLock.current = false; if (active.current) setLocalSaving(false); }
   }
@@ -169,7 +166,7 @@ export default function CulturalDiscoveries({ prepareImages, onEvidence, ownerId
     try {
       await flush(); await prepareImages(controller.signal);
       if (!active.current || controller.signal.aborted) return;
-      await accept(await request(`${endpoint}${visible ? '?force=true' : ''}`, { method: 'POST' }));
+      await accept(await request(`${endpoint}${visible ? '?force=true' : ''}`, { method: 'POST', timeoutMs: 180000 }));
       if (active.current) { setPaused(false); automaticBatches.current = 0; musicAttempts.current = 0; setAnalyticsRevision(value => value + 1); }
     } catch (failure) { if (active.current) setError(failure.message || 'Couldn’t start discoveries. Please retry.'); }
     finally { requests.current.delete(controller); if (active.current) setStarting(false); }
@@ -185,7 +182,6 @@ export default function CulturalDiscoveries({ prepareImages, onEvidence, ownerId
   const Icon = icons[card?.domain] || Sparkles;
   const disabled = localSaving || starting || Boolean(storageError);
   return <section id="cultural-discoveries" className="culture-section" aria-labelledby="culture-title">
-    {fashionCard && <FashionReferencePicker entity={fashionCard} images={images} onCancel={() => setFashionCard(null)} onConfirm={ids => choose('fashion', ids)} />}
     <div className="culture-heading deck-heading"><div><Eyebrow>Powered by Qloo</Eyebrow><h1 id="culture-title">Discover your <em>direction.</em></h1><p>One discovery. Your choice.</p></div><Button variant="secondary" disabled={starting || loading || fetching || running || Boolean(storageError)} onClick={start}>{sessionId ? 'Refresh discoveries' : 'Start discovering'}<Sparkles size={15} /></Button></div>
     <div className="deck-toolbar deck-toolbar--mixed"><small aria-live="polite">{pendingRows.length ? syncError ? `${pendingChoices || pendingRows.length} waiting to sync` : pendingChoices ? `Syncing ${pendingChoices} choice${pendingChoices === 1 ? '' : 's'}…` : 'Syncing…' : 'Synced'}</small>{sessionId && <button type="button" className="culture-text-button" onClick={() => setPaused(value => !value)}>{paused ? <Play size={14} /> : <Pause size={14} />}{paused ? 'Resume' : 'Pause'}</button>}</div>
     <div aria-live="polite">{(loading || starting && !card || running) && <p role="status">Finding your connections…</p>}{(error || storageError) && <p role="alert" className="culture-notice">{storageError || error}</p>}{syncError && <p className="deck-sync-notice">Choices remain on this device. <button className="culture-text-button" onClick={() => flush().catch(() => {})}>Retry sync</button></p>}{paused && <p role="status">Paused. Your place is saved.</p>}</div>

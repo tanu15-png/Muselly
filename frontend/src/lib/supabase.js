@@ -12,24 +12,33 @@ export class ApiError extends Error {
   constructor(message, status) { super(message); this.status = status; }
 }
 
-export async function apiRequest(path, { method = 'GET', body, signal, blob = false, expectedOwner } = {}) {
+export async function apiRequest(path, { method = 'GET', body, signal, blob = false, stream = false, expectedOwner, timeoutMs } = {}) {
   if (!supabase) throw new ApiError('Sign-in is currently unavailable.', 503);
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   if (!data.session) throw new ApiError('Please sign in to continue.', 401);
   if (expectedOwner && data.session.user?.id !== expectedOwner) throw new ApiError('Sign in to the original account to sync these choices.', 401);
   const response = await fetch(path, {
-    method, signal: AbortSignal.any([...(signal ? [signal] : []), AbortSignal.timeout(blob ? 45000 : 120000)]), cache: 'no-store',
+    method, signal: AbortSignal.any([...(signal ? [signal] : []), AbortSignal.timeout(timeoutMs ?? (blob ? 45000 : 120000))]), cache: 'no-store',
     headers: { Authorization: `Bearer ${data.session.access_token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+  if (stream && response.ok) {
+    if (!response.headers.get('Content-Type')?.includes('application/x-ndjson')) throw new ApiError('The shopping agent returned an unexpected response. Please retry.', 502);
+    return response;
+  }
   if (blob && response.ok) {
     if (!/^image\/(png|jpeg|webp)(?:;|$)/i.test(response.headers.get('Content-Type') || '')) {
       throw new ApiError('The server returned a page instead of an image. Check the API connection and retry.', 502);
     }
     return response.blob();
   }
-  const result = await response.json().catch(() => null);
+  let result;
+  try { result = await response.json(); }
+  catch (failure) {
+    if (response.ok) throw new ApiError('The response was interrupted. Please retry.', 502);
+    result = null;
+  }
   if (!response.ok) {
     if (response.status === 401 && data.session.user?.id) clearCache(data.session.user.id);
     throw new ApiError(typeof result?.detail === 'string' ? result.detail : 'Unable to complete this request. Please try again.', response.status);

@@ -49,8 +49,9 @@ export function createDiscoveryStore(factory) {
   return {
     load: owner => change(owner),
     async accept(owner, run) {
+      if (!run || typeof run !== 'object') throw new Error('Couldn’t load discoveries. Please retry.');
       return change(owner, state => {
-        const same = session(state.deck)?.id === run.session?.id;
+        const same = Boolean(run.session?.id && session(state.deck)?.id === run.session.id);
         const consumed = new Set(same ? state.deck.consumed : []);
         let queue = (run.session?.queue || []).filter(item => !consumed.has(item.entity_id));
         for (const event of state.events.filter(row => row.session_id === run.session?.id)) {

@@ -230,6 +230,23 @@ class Feedback(BaseModel):
     reference_image_ids: list[UUID] | None = Field(default=None, max_length=20)
 
 
+class FashionNote(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    note: str = Field(max_length=500)
+
+
+@router.patch('/feedback/{entity_id}/fashion-note')
+def save_fashion_note(entity_id: UUID, payload: FashionNote,
+                      user: AuthUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    locked_profile(db, user)
+    row = db.get(CulturalFeedback, (user.id, entity_id))
+    if not row or not row.fashion_inspiration:
+        raise HTTPException(404, 'Saved fashion discovery not found.')
+    row.fashion_note = payload.note
+    db.commit()
+    return {'note': row.fashion_note}
+
+
 @router.put('/feedback/{entity_id}')
 def feedback(entity_id: UUID, payload: Feedback, request: Request,
              user: AuthUser = Depends(get_current_user), db: Session = Depends(get_db)):

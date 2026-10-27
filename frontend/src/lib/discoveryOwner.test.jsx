@@ -17,3 +17,9 @@ it('allows synchronization only for the matching signed-in account', async () =>
   await apiRequest('/api/onboarding/culture/sessions/s1/sync', { method: 'POST', body: { actions: [] }, expectedOwner: 'account-b' });
   expect(fetch).toHaveBeenCalledTimes(1);
 });
+
+it('reports an interrupted successful response rather than returning a null discovery', async () => {
+  fetch.mockResolvedValue({ ok: true, json: async () => { throw new Error('Body interrupted'); } });
+  const { apiRequest } = await import('./supabase');
+  await expect(apiRequest('/api/onboarding/culture')).rejects.toMatchObject({ status: 502, message: expect.stringContaining('Please retry') });
+});

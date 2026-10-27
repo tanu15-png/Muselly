@@ -162,3 +162,13 @@
 .fashion-direction > .culture-text-button { margin-top: 24px; }
 @media (max-width: 700px) { .fashion-direction-grid { grid-template-columns: 1fr; }.fashion-direction-media { height: 240px; } }
 @media (max-width: 480px) { .fashion-reference-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.fashion-direction-card--note { display: grid; grid-template-columns: 105px minmax(0, 1fr); align-items: start; padding: 18px; gap: 18px; }
+.fashion-direction-card--note .fashion-direction-poster { height: 155px; border-radius: 9px; background: #f5f0ed; }
+.fashion-direction-card--note .fashion-direction-copy { padding: 0; }
+.fashion-direction-card--note h3 { font-size: 1.15rem; margin-bottom: 14px; }
+.fashion-note label { display: block; font-size: .78rem; margin-bottom: 8px; }
+.fashion-note textarea { width: 100%; box-sizing: border-box; resize: vertical; border: 1px solid var(--line, #e8dfe3); border-radius: 10px; padding: 10px; font: inherit; font-size: .8rem; background: #fff; }
+.fashion-note small { display: block; min-height: 18px; color: var(--muted); font-size: .7rem; }
+.fashion-direction-card--note .fashion-direction-actions { margin-top: 8px; }
+@media (max-width: 450px) { .fashion-direction-card--note { grid-template-columns: 65px minmax(0, 1fr); gap: 12px; padding: 14px; }.fashion-direction-card--note .fashion-direction-poster { height: 98px; } }

@@ -8,6 +8,14 @@ const run = { session: { id: 's1', queue: [card, second], choices_since_refresh:
 let factory, store;
 beforeEach(async () => { factory = new IDBFactory(); store = createDiscoveryStore(factory); await store.accept('owner', run); });
 
+it('opens a new account before its first discovery session exists', async () => {
+  const fresh = createDiscoveryStore(new IDBFactory());
+  expect((await fresh.accept('new-owner', { status: 'not_generated', session: null })).run.status).toBe('not_generated');
+  expect((await fresh.accept('new-owner', run)).run.session.queue).toEqual([card, second]);
+  await expect(fresh.accept('new-owner', null)).rejects.toThrow('Please retry');
+  expect((await fresh.load('new-owner')).run.session.queue).toEqual([card, second]);
+});
+
 it('keeps confirmed reference selections through reload and batch delivery', async () => {
   await store.choose('owner', card, 'fashion', ['look-1', 'look-2']);
   const restored = createDiscoveryStore(factory);

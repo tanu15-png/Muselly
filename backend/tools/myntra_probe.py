@@ -75,10 +75,12 @@ def normalize(raw, group):
 
 def image_check(client, row):
     try:
+        deadline = time.monotonic() + 25
         with client.stream('GET', row['image_url']) as response:
             response.raise_for_status()
             chunks, size = [], 0
             for chunk in response.iter_bytes():
+                if time.monotonic() > deadline: raise TimeoutError('image_download_deadline')
                 size += len(chunk)
                 if size > 8_000_000: raise ValueError('image_too_large')
                 chunks.append(chunk)

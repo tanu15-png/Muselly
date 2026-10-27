@@ -53,13 +53,9 @@ it('restores the local next card after reloading and keeps stale server cards hi
 });
 it('undo restores locally before any server response', async () => {
   await open(); fireEvent.click(screen.getByRole('button', { name: 'Use as fashion inspiration' }));
-  await screen.findByRole('dialog');
-  expect(screen.getByRole('button', { name: 'Save connection' }).disabled).toBe(true);
-  expect(screen.getByRole('article', { name: 'Discovery 1' })).toBeTruthy();
-  fireEvent.click(screen.getByRole('button', { name: 'Select look.jpg' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Save connection' }));
   await screen.findByRole('article', { name: 'Discovery 2' });
-  expect((await storage.current.load('owner')).pending.find(row => row.action === 'fashion').reference_image_ids).toEqual(['look-1']);
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect((await storage.current.load('owner')).pending.find(row => row.action === 'fashion').reference_image_ids).toBeUndefined();
   fireEvent.click(screen.getByRole('button', { name: 'Undo' })); await screen.findByRole('article', { name: 'Discovery 1' });
   const local = await storage.current.load('owner');
   expect(local.pending.filter(row => row.action !== 'shown').map(row => row.action)).toEqual(['fashion', 'undo']);

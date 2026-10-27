@@ -81,7 +81,7 @@ def analytics(user: AuthUser = Depends(get_current_user), db: Session = Depends(
             current_ids = {str(image.id) for image in images}
             linked = [value for value in (row.reference_image_ids or []) if value in current_ids]
             evidence = [item for item in observations if item['image_id'] in linked]
-            fashion_entities.append({**row.entity, 'preference': row.preference, 'reference_image_ids': linked,
+            fashion_entities.append({**row.entity, 'preference': row.preference, 'reference_image_ids': linked, 'fashion_note': row.fashion_note or '',
                 'colors': sorted({value for item in evidence for value in item.get('colors', [])}),
                 'patterns': sorted({value for item in evidence for value in item.get('patterns', [])})})
     undone = {row.data.get('target_id') for row in events if row.action == 'undo'}
