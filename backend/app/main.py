@@ -33,6 +33,7 @@ from .cultural_analytics import router as cultural_analytics_router
 from .myntra_shopping import router as myntra_shopping_router
 from .shopping_agent import router as shopping_agent_router
 from .retailer_images import RetailerImages
+from .outfits import router as outfits_router
 
 Style = Literal["romantic", "classic", "casual", "chic"]
 
@@ -86,6 +87,7 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
     app.include_router(cultural_analytics_router)
     app.include_router(myntra_shopping_router)
     app.include_router(shopping_agent_router)
+    app.include_router(outfits_router)
 
     @app.middleware("http")
     async def response_headers(request, call_next):

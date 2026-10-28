@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     supabase_secret_key: str = ""
     gemini_api_key: str = ""
     gemini_model: str = Field(default="gemini-3.8-flash", pattern=r"^gemini-[a-z0-9.-]+$", max_length=100)
+    gemini_image_model: str = Field(default="gemini-nano-banana-2.1", pattern=r"^gemini-[a-z0-9.-]+$")
     qloo_api_key: str = ""
     # Retain the environment setting name for existing deployments.
     myntra_catalog_path: str = str(BACKEND_ROOT / 'data/multi-retailer/catalog-products.json')

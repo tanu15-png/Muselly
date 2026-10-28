@@ -5,6 +5,27 @@ domain. The image includes the saved **6,098-product catalog**. Deployment and
 shopping searches do not call Apify. Authentication, database and private images
 continue to use your existing Supabase project; no Railway volume is required.
 
+## Update the existing deployment: outfit previews
+
+1. Open the existing Muselly service in Railway, then **Variables**.
+2. Keep the existing Gemini key, Qloo and Supabase variables. Add
+   `GEMINI_IMAGE_MODEL=gemini-nano-banana-2.1` (the tested default).
+3. Deploy the latest `main` commit from GitHub. If automatic deployment is enabled,
+   the push can start a build immediately; otherwise use **Deploy Latest Commit**.
+4. Keep the root Dockerfile and `alembic upgrade head` pre-deploy command. Migration
+   `0012_outfits` is already applied to the current Supabase database; Alembic will
+   skip it there and apply it on any other configured database.
+5. Wait for build, migration and health checks to pass. Open `/shop`, sign in,
+   and reload to see saved previews. Check Like / Not for me, optional reason,
+   image correction and Find similar pieces. Each generated image or correction
+   uses one allowance: 3 daily (midnight UTC), 10 lifetime per account. Feedback
+   and product searches do not use image allowances.
+
+Generated previews and their feedback are private, stored in Supabase PostgreSQL,
+so no new Storage bucket or Railway volume is required. All existing catalog
+products remain bundled. No new API key or frontend VITE variable is needed.
+The previous live test saved two previews on the selected review account.
+
 ## 1. Push the project
 
 Push the project to your GitHub repository, including `Dockerfile`, `.dockerignore`,
@@ -15,7 +36,7 @@ checks its checksums. Keep your `.env` files out of GitHub.
 
 ## 2. Create one Railway service
 
-In Railway choose **New Project → Deploy from GitHub repo**, then select Muselly.
+In Railway choose **New Project â†’ Deploy from GitHub repo**, then select Muselly.
 Keep the service root at the repository root, not `backend/` or `frontend/`.
 Railway reads the root Dockerfile and `railway.json`. Leave custom build and
 start commands unset. An initial build without variables may fail; add the
@@ -59,11 +80,11 @@ against your configured database; failed migrations stop the deployment.
 
 ## 4. Set the domain and Google sign-in redirect
 
-Under service **Settings → Networking**, generate a public domain. Set
+Under service **Settings â†’ Networking**, generate a public domain. Set
 `APP_ORIGIN` to its full HTTPS origin, without a trailing slash, and redeploy.
 If Railway asks for the target port, use its assigned `PORT` (8080 by default).
 
-In **Supabase → Authentication → URL Configuration**:
+In **Supabase â†’ Authentication â†’ URL Configuration**:
 
 - Set **Site URL** to the public HTTPS origin.
 - Add `https://YOUR-RAILWAY-DOMAIN/auth/callback` to **Redirect URLs**.

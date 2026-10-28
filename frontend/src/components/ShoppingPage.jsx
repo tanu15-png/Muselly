@@ -4,6 +4,7 @@ import { useAuth } from './AuthProvider';
 import { Brand, Button, Eyebrow } from './ui';
 import SignIn from './SignIn';
 import ResilientImage from './ResilientImage';
+import OutfitPreview from './OutfitPreview';
 import { apiRequest } from '../lib/supabase';
 import { readAgentEvents } from '../lib/shoppingAgent';
 import { shoppingFeedbackStore } from '../lib/shoppingFeedback';
@@ -61,7 +62,7 @@ export function OutfitShop({ ownerId }) {
         apply(store.load(ownerId));
         const server = await api('/api/shop/feedback');
         if (active.current) apply(store.merge(ownerId, server.choices));
-      } catch (failure) { if (active.current) setSyncError('Couldn’t sync your choices. They remain on this device.'); }
+      } catch (failure) { if (active.current) setSyncError('Couldnâ€™t sync your choices. They remain on this device.'); }
       finally { if (active.current) { initialized.current = true; setReady(true); } }
     })();
     const online = () => { if (initialized.current) flush().catch(() => {}); };
@@ -85,7 +86,7 @@ export function OutfitShop({ ownerId }) {
             ...(context ? { session_id: context.session_id, revision: context.revision } : {}) },
           onProgress: message => { if (active.current) setProgress(message); } });
       if (active.current) { setResult(previous => offset ? { ...data, products: [...new Map([...previous.products, ...data.products].map(row => [row.product_id, row])).values()] } : data); setSearchQuery(text || 'outfit'); if (followup) setCorrection(''); }
-    } catch (failure) { if (active.current) setError(failure.message || 'Couldn’t find outfits. Please retry.'); }
+    } catch (failure) { if (active.current) setError(failure.message || 'Couldnâ€™t find outfits. Please retry.'); }
     finally { lock.current = false; if (active.current) { setBusy(false); setProgress(''); } }
   }
   function choose(id, choice) {
@@ -97,25 +98,26 @@ export function OutfitShop({ ownerId }) {
   return <main id="main-content" className="container outfit-shop">
     <div className="shop-heading"><Eyebrow>Shop your Qloo taste</Eyebrow><h1>Find your next <em>favorite.</em></h1></div>
     <form className="outfit-request" onSubmit={event => { event.preventDefault(); setLikedOnly(false); find(query, 0, false); }}>
-      <label htmlFor="outfit-query">What would you like to wear?</label><textarea id="outfit-query" value={query} maxLength={280} required minLength={2} onChange={event => setQuery(event.target.value)} placeholder="A dress for a Switzerland vacation under ₹3,000" rows={2} />
-      <div className="shop-request-actions"><small>Women’s clothing · budget per item</small><Button disabled={busy || !ready || query.trim().length < 2} type="submit"><Search size={16} />{busy ? 'Finding your favorites…' : 'Find my outfit'}</Button></div>
+      <label htmlFor="outfit-query">What would you like to wear?</label><textarea id="outfit-query" value={query} maxLength={280} required minLength={2} onChange={event => setQuery(event.target.value)} placeholder="A dress for a Switzerland vacation under â‚¹3,000" rows={2} />
+      <div className="shop-request-actions"><small>Womenâ€™s clothing Â· budget per item</small><Button disabled={busy || !ready || query.trim().length < 2} type="submit"><Search size={16} />{busy ? 'Finding your favoritesâ€¦' : 'Find my outfit'}</Button></div>
     </form>
-    <div className="shop-examples">{['Everyday office outfit under ₹2,000', 'A floral midi dress under ₹1,500'].map(example => <button type="button" key={example} disabled={busy || !ready} onClick={() => { setQuery(example); setLikedOnly(false); find(example, 0, false); }}>{example}</button>)}</div>
-    <div className="shop-toolbar"><button type="button" className="culture-text-button" aria-pressed={likedOnly} disabled={busy || !ready} onClick={() => { const liked = !likedOnly; setLikedOnly(liked); find(liked ? 'outfit' : query || 'outfit', 0, liked); }}><Heart size={14} />{likedOnly ? 'Back to search' : 'My likes'}</button><small role="status">{syncError ? <>{syncError} <button className="culture-text-button" onClick={() => flush().catch(() => {})}>Retry</button></> : pending ? `${pending} saving…` : 'Choices synced'}</small></div>
+    <OutfitPreview ownerId={ownerId} query={query} onSearch={text => { setQuery(text); setLikedOnly(false); find(text, 0, false); }} />
+    <div className="shop-examples">{['Everyday office outfit under â‚¹2,000', 'A floral midi dress under â‚¹1,500'].map(example => <button type="button" key={example} disabled={busy || !ready} onClick={() => { setQuery(example); setLikedOnly(false); find(example, 0, false); }}>{example}</button>)}</div>
+    <div className="shop-toolbar"><button type="button" className="culture-text-button" aria-pressed={likedOnly} disabled={busy || !ready} onClick={() => { const liked = !likedOnly; setLikedOnly(liked); find(liked ? 'outfit' : query || 'outfit', 0, liked); }}><Heart size={14} />{likedOnly ? 'Back to search' : 'My likes'}</button><small role="status">{syncError ? <>{syncError} <button className="culture-text-button" onClick={() => flush().catch(() => {})}>Retry</button></> : pending ? `${pending} savingâ€¦` : 'Choices synced'}</small></div>
     {last && <div className="shop-choice-status" role="status">{last.choice === 'dislike' ? 'Not for me saved.' : last.choice === 'like' ? 'Liked.' : 'Choice removed.'} <button className="culture-text-button" onClick={() => { choose(last.id, last.before); setLast(null); }}>Undo</button></div>}
-    {busy && <p className="shop-agent-progress" role="status" aria-live="polite">{progress}…</p>}
+    {busy && <p className="shop-agent-progress" role="status" aria-live="polite">{progress}â€¦</p>}
     {error && <p role="alert">{error}</p>}
     {result?.agent && !likedOnly && <section className="shop-agent" aria-label="Shopping assistant">
       <p>{result.agent.message}</p>
       {result.agent.mode === 'rules_fallback' && <small>Language interpretation is temporarily unavailable. Using supported clothing terms.</small>}
       <form onSubmit={event => { event.preventDefault(); find(correction, 0, false, true); }}>
         <label htmlFor="outfit-correction">{result.agent.question ? 'Tell me a little more' : 'What should I change?'}</label>
-        <div><input id="outfit-correction" value={correction} onChange={event => setCorrection(event.target.value)} maxLength={280} minLength={2} required placeholder="Less formal, more floral, or cheaper…" disabled={busy} />
+        <div><input id="outfit-correction" value={correction} onChange={event => setCorrection(event.target.value)} maxLength={280} minLength={2} required placeholder="Less formal, more floral, or cheaperâ€¦" disabled={busy} />
         <Button type="submit" variant="secondary" disabled={busy || correction.trim().length < 2}>Update</Button></div>
       </form>
     </section>}
-    {result && !result.agent?.question && <><div className="shop-results-heading"><h2>{likedOnly ? 'Your liked pieces' : 'Pieces for your request'}</h2><span>{Math.max(products.length, result.total - (result.products.length - products.length))} matches · {result.catalog_count.toLocaleString()} products</span></div>
-      <p className="shop-catalog-note">Highest taste match first · estimated from your taste signals. Confirm current price, size and availability at the store.</p>
+    {result && !result.agent?.question && <><div className="shop-results-heading"><h2>{likedOnly ? 'Your liked pieces' : 'Pieces for your request'}</h2><span>{Math.max(products.length, result.total - (result.products.length - products.length))} matches Â· {result.catalog_count.toLocaleString()} products</span></div>
+      <p className="shop-catalog-note">Highest taste match first Â· estimated from your taste signals. Confirm current price, size and availability at the store.</p>
       <div className="shop-applied">{result.filters?.categories?.map(category => <span key={category}>{category}</span>)}{result.filters?.max_price && <span>Up to {money(result.filters.max_price)}</span>}{result.taste?.linked_discoveries > 0 && <span>{result.taste.linked_discoveries} linked cultural {result.taste.linked_discoveries === 1 ? 'discovery' : 'discoveries'}</span>}{result.taste?.qloo_brands > 0 && <span>{result.taste.qloo_brands} Qloo-connected brands in catalog</span>}</div>
       {result.taste?.qloo_status === 'unavailable' && <p className="shop-catalog-note">Qloo brand connections are temporarily unavailable. Your saved fashion preferences still guide results.</p>}
       {result.taste?.qloo_status === 'no_saved_interests' && <p className="shop-catalog-note"><a href="/dashboard">Save cultural discoveries and add fashion notes</a> to make this more personal.</p>}
@@ -125,14 +127,14 @@ export function OutfitShop({ ownerId }) {
           <div className="outfit-product-feedback"><button type="button" aria-pressed={choices[row.product_id] === 'like'} disabled={!ready} onClick={() => choose(row.product_id, choices[row.product_id] === 'like' ? 'clear' : 'like')}><Heart size={16} />{choices[row.product_id] === 'like' ? 'Liked' : 'I like this'}</button><button type="button" disabled={!ready} onClick={() => choose(row.product_id, 'dislike')}><ThumbsDown size={16} />Not for me</button></div>
           <a className="shop-store-link" href={row.product_url} target="_blank" rel="noopener noreferrer">View on {row.retailer || 'Myntra'} <ArrowUpRight size={14} /></a>
         </div></article>)}</div> : <p className="shop-empty">{result.notice || (likedOnly ? 'Your liked pieces will appear here.' : 'No pieces match these details. Try a wider budget or fewer details.')}</p>}
-      {result.products.length < result.total && <Button variant="secondary" disabled={busy} onClick={() => find(searchQuery, result.products.length)}>{busy ? 'Loading…' : 'Show more'}</Button>}
+      {result.products.length < result.total && <Button variant="secondary" disabled={busy} onClick={() => find(searchQuery, result.products.length)}>{busy ? 'Loadingâ€¦' : 'Show more'}</Button>}
     </>}
   </main>;
 }
 
 export default function ShoppingPage() {
   const { status, user, error, retry } = useAuth();
-  useEffect(() => { document.title = 'Shop your taste — Muselly'; }, []);
+  useEffect(() => { document.title = 'Shop your taste â€” Muselly'; }, []);
   useEffect(() => {
     try {
       if (status === 'signed-out') sessionStorage.setItem('muselly-explore-return', '/shop');
@@ -140,5 +142,5 @@ export default function ShoppingPage() {
     } catch { /* Shopping can still open when session storage is unavailable. */ }
   }, [status]);
   const header = <header className="dashboard-header"><div className="container dashboard-nav"><Brand /><nav aria-label="Shopping navigation"><a href="/dashboard">My fashion direction</a></nav></div></header>;
-  return <>{header}{status === 'signed-in' && user ? <OutfitShop key={user.id} ownerId={user.id} /> : status === 'signed-out' ? <SignIn /> : <main className="container outfit-shop"><p role="status">{error || 'Checking your sign-in…'}</p>{status === 'error' && <Button onClick={retry}>Retry</Button>}</main>}</>;
+  return <>{header}{status === 'signed-in' && user ? <OutfitShop key={user.id} ownerId={user.id} /> : status === 'signed-out' ? <SignIn /> : <main className="container outfit-shop"><p role="status">{error || 'Checking your sign-inâ€¦'}</p>{status === 'error' && <Button onClick={retry}>Retry</Button>}</main>}</>;
 }
