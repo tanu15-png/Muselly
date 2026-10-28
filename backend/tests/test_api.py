@@ -102,7 +102,7 @@ def test_saved_answers_are_validated_and_isolated_by_verified_user(client, datab
 
 def test_migration_round_trip_and_model_consistency(database):
     engine, config = database
-    assert set(inspect(engine).get_table_names()) == {"alembic_version", "muselly_user_profiles", "muselly_taste_profiles", "muselly_taste_tests", "muselly_inspiration_images", "muselly_taste_analysis_runs", "muselly_taste_enrichment_runs", "muselly_taste_affinity_dismissals", "muselly_saved_products", "muselly_product_feedback", "muselly_cultural_runs", "muselly_cultural_feedback", "muselly_cultural_sessions", "muselly_cultural_exposures", "muselly_cultural_events", "muselly_shopping_agent_sessions"}
+    assert set(inspect(engine).get_table_names()) == {"alembic_version", "muselly_user_profiles", "muselly_taste_profiles", "muselly_taste_tests", "muselly_inspiration_images", "muselly_taste_analysis_runs", "muselly_taste_enrichment_runs", "muselly_taste_affinity_dismissals", "muselly_saved_products", "muselly_product_feedback", "muselly_cultural_runs", "muselly_cultural_feedback", "muselly_cultural_sessions", "muselly_cultural_exposures", "muselly_cultural_events", "muselly_shopping_agent_sessions", "muselly_outfit_limits", "muselly_outfits"}
     command.check(config)
     command.downgrade(config, "base")
     assert set(inspect(engine).get_table_names()) == {"alembic_version"}

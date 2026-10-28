@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, ForeignKey, JSON, String, Uuid, Integer, UniqueConstraint, func
+from sqlalchemy import DateTime, ForeignKey, JSON, String, Text, Uuid, Integer, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -182,3 +182,19 @@ class CulturalEvent(Base):
     action: Mapped[str] = mapped_column(String(20))
     data: Mapped[dict] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class OutfitLimit(Base):
+    __tablename__ = 'muselly_outfit_limits'
+    user_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    day: Mapped[str] = mapped_column(String(10))
+    daily: Mapped[int] = mapped_column(Integer)
+    total: Mapped[int] = mapped_column(Integer)
+
+
+class GeneratedOutfit(Base):
+    __tablename__ = 'muselly_outfits'
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), index=True)
+    payload: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[str] = mapped_column(String(40))
