@@ -21,8 +21,9 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
     finally { feedbackLock.current = false; setSavingFeedback(false); }
   }
   const [pieces, setPieces] = useState([]);
+  const [activity, setActivity] = useState('');
   async function findPieces() {
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setActivity('Finding outfit pieces...');
     try { const data = await apiRequest(`/api/outfits/${selected.id}/similar`, { method: 'POST', expectedOwner: ownerId }); setPieces(data.queries); }
     catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
@@ -36,7 +37,7 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
   }, [ownerId]);
   async function generate(correction = false) {
     if (lock.current) return;
-    lock.current = true; setBusy(true); setError('');
+    lock.current = true; setBusy(true); setError(''); setActivity('Creating your outfit from your request and Qloo taste...');
     try {
       const data = await apiRequest('/api/outfits', { expectedOwner: ownerId, method: 'POST', timeoutMs: 180000,
         body: { message: correction ? change : query, ...(correction ? { parent_id: selected.id } : {}) } });
@@ -45,19 +46,19 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
     finally { lock.current = false; setBusy(false); }
   }
   const exhausted = !quota || quota.daily_remaining <= 0 || quota.total_remaining <= 0;
-  return <section className="shop-agent" aria-label="Outfit inspiration">
-    <Button variant="secondary" disabled={savingFeedback || busy || exhausted || query.trim().length < 2} onClick={() => generate()}>Visualize my outfit</Button>
-    {quota && <small> {quota.daily_remaining} today · {quota.total_remaining} total remaining. Each revision uses one image. Resets at midnight UTC.</small>}
-    {busy && <p role="status">Creating your outfit from your request and Qloo taste…</p>}
+  return <section className="outfit-preview" aria-label="Outfit inspiration">
+    <Button variant="secondary" disabled={savingFeedback || busy || exhausted || query.trim().length < 2} onClick={() => generate()}>{selected ? 'Generate another outfit' : 'Generate one outfit'}</Button>
+    {quota && <small> {quota.daily_remaining} of 3 left today · {quota.total_remaining} total remaining. One image per click, including revisions. Resets at midnight UTC.</small>}
+    {busy && <p role="status">{activity}</p>}
     {error && <p role="alert">{error}</p>}
     {selected && <>
       <p>AI outfit inspiration · similar pieces may differ</p>
-      <img src={`data:${selected.mime};base64,${selected.image}`} alt="Generated outfit inspiration" style={{ width: '100%', maxWidth: 420, borderRadius: 16 }} />
+      <img src={`data:${selected.mime};base64,${selected.image}`} alt="Generated outfit inspiration"  />
       <div className="outfit-product-feedback">
         <button type="button" disabled={savingFeedback || busy} aria-pressed={selected.feedback?.choice === 'like'} onClick={() => vote(selected.feedback?.choice === 'like' ? 'clear' : 'like')}>I like this</button>
         <button type="button" disabled={savingFeedback || busy} aria-pressed={selected.feedback?.choice === 'dislike'} onClick={() => vote(selected.feedback?.choice === 'dislike' ? 'clear' : 'dislike')}>Not for me</button>
       </div>
-      {selected.feedback && <div>
+      {selected.feedback && <div className="feedback-details">
         <label htmlFor="outfit-feedback-reason">{selected.feedback.choice === 'like' ? 'What do you like?' : 'What feels wrong?'} (optional)</label>
         <select id="outfit-feedback-reason" disabled={savingFeedback || busy} value={selected.feedback.reason || ''} onChange={event => vote(selected.feedback.choice, event.target.value || null)}>
           <option value="">No specific reason</option><option value="color">Color</option><option value="shape">Shape</option><option value="overall style">Overall style</option>
@@ -71,7 +72,7 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
         <input id="preview-correction" value={change} onChange={event => setChange(event.target.value)} maxLength={280} placeholder="Keep the trousers, change the top" />
         <Button disabled={savingFeedback || busy || exhausted || change.trim().length < 2}>Revise image</Button>
       </form>
-      <Button variant="secondary" disabled={savingFeedback || busy} onClick={findPieces}>Find similar pieces</Button>
+      <Button variant="secondary" disabled={savingFeedback || busy} onClick={findPieces}>Find pieces to shop</Button>
       {pieces.map(piece => <button type="button" key={piece} onClick={() => onSearch(piece)}>{piece}</button>)}
       {items.length > 1 && <select disabled={savingFeedback || busy} aria-label="Saved outfit previews" value={selected.id} onChange={event => { setSelected(items.find(item => item.id === event.target.value)); setPieces([]); }}>{items.map((item, index) => <option key={item.id} value={item.id}>Outfit {items.length - index}</option>)}</select>}
     </>}

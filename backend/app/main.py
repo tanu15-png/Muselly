@@ -136,7 +136,7 @@ def create_app(settings: Settings | None = None, *, auth_transport=None, public_
 
     # The React route guard verifies bearer tokens before showing the taste UI;
     # every taste/onboarding API independently verifies authentication server-side.
-    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/explore", "/shop", "/auth/callback"):
+    for route in ("/", "/sign-in", "/taste-test", "/dashboard", "/explore", "/shop", "/visualize", "/auth/callback"):
         app.add_api_route(route, entry_page, methods=["GET"], include_in_schema=False)
     for name in ("assets", "images"):
         if (public / name).is_dir():

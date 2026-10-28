@@ -107,7 +107,11 @@ def generate(body: Generate, request: Request, user: AuthUser = Depends(get_curr
         brief = {'request': body.message, 'previous_request': parent.get('brief') if parent else None,
                  'confirmed_fashion_connections': bridges, 'preferences': stated, 'avoid': avoided,
                  'qloo_brand_affinities': brands, 'outfit_feedback': outfit_choices}
-        parts = [{'text': 'Create one complete women’s outfit inspiration image. Follow the current request and corrections first. '
+        parts = [{'text': 'Create one clothing-only flat-lay outfit image on a plain white background. '
+                  'Show only the garments arranged neatly, no person or mannequin, no scenery, furniture, text, '
+                  'cups, bags, jewelry, shoes, belts or other props/accessories. '
+                  'For revisions, remove any people, scenery and props from the previous image; retain only requested garments. '
+                  'Follow the current request and corrections first. '
                   'Use confirmed fashion connections and preferences; Qloo affinities provide secondary styling context. '
                   'Do not infer costumes from cultural names. No labels, prices or invented availability. '
                   'Learn from outfit_feedback: reuse liked qualities and vary disliked qualities within the current occasion. '

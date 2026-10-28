@@ -1,0 +1,16 @@
+.visualize-page { max-width: 820px; padding-top: 48px; padding-bottom: 72px; }
+.visualize-page h1 { margin: 12px 0 28px; }
+.visualize-page label { display: block; margin-bottom: 8px; font-size: .88rem; }
+.visualize-page textarea, .visualize-page input, .visualize-page select { width: 100%; box-sizing: border-box; padding: 14px; border: 1px solid var(--line, #e8dfe3); border-radius: 14px; background: white; color: inherit; font: inherit; }
+.outfit-preview { display: grid; gap: 18px; margin-top: 18px; }
+.outfit-preview > .button { justify-self: start; }
+.outfit-preview p { margin: 0; }
+.outfit-preview small { color: var(--muted); line-height: 1.6; }
+.outfit-preview > img { display: block; width: 100%; max-width: 520px; max-height: 650px; object-fit: contain; margin: 0 auto; border-radius: 20px; background: white; }
+.outfit-preview .outfit-product-feedback { display: flex; gap: 12px; }
+.outfit-preview button:not(.button) { border: 1px solid var(--line, #e8dfe3); border-radius: 12px; padding: 12px 18px; background: white; color: inherit; font: inherit; cursor: pointer; }
+.outfit-preview button[aria-pressed="true"] { background: #f9e7ef; border-color: #d78ba6; }
+.outfit-preview button:disabled { opacity: .5; cursor: default; }
+.outfit-preview form, .outfit-preview .feedback-details { display: grid; gap: 10px; }
+.outfit-preview form .button, .outfit-preview .feedback-details button { justify-self: start; }
+@media (max-width: 540px) { .visualize-page { padding-top: 28px; } .outfit-preview .outfit-product-feedback { flex-wrap: wrap; } }

@@ -8,7 +8,7 @@ export function openTasteTest() {
   try {
     const destination = sessionStorage.getItem('muselly-explore-return');
     sessionStorage.removeItem('muselly-explore-return');
-    if (destination && /^\/(?:explore|shop)(?:[?#]|$)/.test(destination)) {
+    if (destination && /^\/(?:explore|shop|visualize)(?:[?#]|$)/.test(destination)) {
       navigate(destination, true);
       return;
     }

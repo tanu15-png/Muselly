@@ -4,7 +4,6 @@ import { useAuth } from './AuthProvider';
 import { Brand, Button, Eyebrow } from './ui';
 import SignIn from './SignIn';
 import ResilientImage from './ResilientImage';
-import OutfitPreview from './OutfitPreview';
 import { apiRequest } from '../lib/supabase';
 import { readAgentEvents } from '../lib/shoppingAgent';
 import { shoppingFeedbackStore } from '../lib/shoppingFeedback';
@@ -15,7 +14,7 @@ const money = value => new Intl.NumberFormat('en-IN', { style: 'currency', curre
 const store = shoppingFeedbackStore();
 
 export function OutfitShop({ ownerId }) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => (new URLSearchParams(window.location.search).get('q') || '').slice(0, 280));
   const [correction, setCorrection] = useState('');
   const [progress, setProgress] = useState('');
   const [result, setResult] = useState(null);
@@ -101,7 +100,6 @@ export function OutfitShop({ ownerId }) {
       <label htmlFor="outfit-query">What would you like to wear?</label><textarea id="outfit-query" value={query} maxLength={280} required minLength={2} onChange={event => setQuery(event.target.value)} placeholder="A dress for a Switzerland vacation under ₹3,000" rows={2} />
       <div className="shop-request-actions"><small>Women’s clothing · budget per item</small><Button disabled={busy || !ready || query.trim().length < 2} type="submit"><Search size={16} />{busy ? 'Finding your favorites…' : 'Find my outfit'}</Button></div>
     </form>
-    <OutfitPreview ownerId={ownerId} query={query} onSearch={text => { setQuery(text); setLikedOnly(false); find(text, 0, false); }} />
     <div className="shop-examples">{['Everyday office outfit under ₹2,000', 'A floral midi dress under ₹1,500'].map(example => <button type="button" key={example} disabled={busy || !ready} onClick={() => { setQuery(example); setLikedOnly(false); find(example, 0, false); }}>{example}</button>)}</div>
     <div className="shop-toolbar"><button type="button" className="culture-text-button" aria-pressed={likedOnly} disabled={busy || !ready} onClick={() => { const liked = !likedOnly; setLikedOnly(liked); find(liked ? 'outfit' : query || 'outfit', 0, liked); }}><Heart size={14} />{likedOnly ? 'Back to search' : 'My likes'}</button><small role="status">{syncError ? <>{syncError} <button className="culture-text-button" onClick={() => flush().catch(() => {})}>Retry</button></> : pending ? `${pending} saving…` : 'Choices synced'}</small></div>
     {last && <div className="shop-choice-status" role="status">{last.choice === 'dislike' ? 'Not for me saved.' : last.choice === 'like' ? 'Liked.' : 'Choice removed.'} <button className="culture-text-button" onClick={() => { choose(last.id, last.before); setLast(null); }}>Undo</button></div>}

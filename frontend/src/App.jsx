@@ -11,6 +11,7 @@ import './styles/explore.css';
 import { useNavigation } from './lib/useNavigation';
 import { navigate } from './lib/navigation';
 const ExplorePage = lazy(() => import('./components/ExplorePage'));
+const VisualizePage = lazy(() => import('./components/VisualizePage'));
 const ShoppingPage = lazy(() => import('./components/ShoppingPage'));
 const TasteDashboard = lazy(() => import('./components/TasteDashboard'));
 
@@ -24,7 +25,7 @@ function Navigation() {
     if (open) window.addEventListener('keydown', close);
     return () => window.removeEventListener('keydown', close);
   }, [open]);
-  return <header className="site-header"><div className="container nav-bar"><Brand /><nav className="desktop-nav" aria-label="Main navigation"><a href="/shop">Shop your taste</a>{links.map(([label, id]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav><div className="nav-actions"><Button href={user ? "/dashboard" : "/sign-in"} variant="secondary" className="sign-in-button">{user ? 'My style' : 'Sign in'}</Button><button id="menu-toggle" className="icon-button mobile-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button></div></div>{open && <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">{links.map(([label, id]) => <a key={id} href={`#${id}`} onClick={() => setOpen(false)}>{label}<ArrowUpRight size={16} /></a>)}<a href={user ? "/dashboard" : "/sign-in"}>{user ? 'My style' : 'Sign in'}<ArrowUpRight size={16} /></a></nav>}</header>;
+  return <header className="site-header"><div className="container nav-bar"><Brand /><nav className="desktop-nav" aria-label="Main navigation"><a href="/shop">Shop your taste</a><a href="/visualize">Visualize an outfit</a>{links.map(([label, id]) => <a key={id} href={`#${id}`}>{label}</a>)}</nav><div className="nav-actions"><Button href={user ? "/dashboard" : "/sign-in"} variant="secondary" className="sign-in-button">{user ? 'My style' : 'Sign in'}</Button><button id="menu-toggle" className="icon-button mobile-toggle" aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} aria-controls="mobile-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button></div></div>{open && <nav id="mobile-navigation" className="mobile-nav" aria-label="Mobile navigation">{links.map(([label, id]) => <a key={id} href={`#${id}`} onClick={() => setOpen(false)}>{label}<ArrowUpRight size={16} /></a>)}<a href={user ? "/dashboard" : "/sign-in"}>{user ? 'My style' : 'Sign in'}<ArrowUpRight size={16} /></a></nav>}</header>;
 }
 
 function Doodle({ className = '' }) {
@@ -80,6 +81,6 @@ export function TasteTestGate({ dashboard = false }) {
 export default function App() {
   const location = useNavigation();
   const path = location.pathname.replace(/\/$/, '') || '/';
-  return <AuthProvider><a className="skip-link" href="#main-content">Skip to content</a>{path === '/' ? <Landing /> : (path === '/taste-test' || path === '/dashboard') ? <TasteTestGate dashboard={path === '/dashboard'} /> : path === '/shop' ? <Suspense fallback={<p role="status">Opening shopping…</p>}><ShoppingPage /></Suspense> : path === '/explore' ? <Suspense fallback={<><EntryHeader /><main id="main-content" className="taste-page container"><p role="status">Opening discovery…</p></main></>}><ExplorePage /></Suspense> : path === '/sign-in' ? <SignIn header={<EntryHeader />} /> : path === '/auth/callback' ? <AuthCallback header={<EntryHeader />} /> : <><EntryHeader /><main id="main-content" className="not-found container"><h1>This page is still on the moodboard.</h1><Button href="/">Back to Muselly <ArrowRight size={18} /></Button></main></>}</AuthProvider>;
+  return <AuthProvider><a className="skip-link" href="#main-content">Skip to content</a>{path === '/' ? <Landing /> : (path === '/taste-test' || path === '/dashboard') ? <TasteTestGate dashboard={path === '/dashboard'} /> : path === '/visualize' ? <Suspense fallback={<p role="status">Opening outfit studio...</p>}><VisualizePage /></Suspense> : path === '/shop' ? <Suspense fallback={<p role="status">Opening shopping…</p>}><ShoppingPage /></Suspense> : path === '/explore' ? <Suspense fallback={<><EntryHeader /><main id="main-content" className="taste-page container"><p role="status">Opening discovery…</p></main></>}><ExplorePage /></Suspense> : path === '/sign-in' ? <SignIn header={<EntryHeader />} /> : path === '/auth/callback' ? <AuthCallback header={<EntryHeader />} /> : <><EntryHeader /><main id="main-content" className="not-found container"><h1>This page is still on the moodboard.</h1><Button href="/">Back to Muselly <ArrowRight size={18} /></Button></main></>}</AuthProvider>;
 }
 
