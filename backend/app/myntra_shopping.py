@@ -194,6 +194,15 @@ def evidence(db, user):
                  timestamp(sources[str(image.id)].get('updated_at')) == timestamp(image.updated_at)}
         observations = {row['image_id']: row for row in (analysis.result or {}).get('images', []) if row['image_id'] in valid}
     bridges = []
+    # Current uploaded-reference analysis also informs shopping without requiring
+    # the customer to connect every image to a cultural discovery.
+    visual_labels = reference_labels([str(label).casefold() for item in observations.values()
+        for field in ('colors', 'patterns', 'silhouettes', 'garments', 'possible_materials')
+        for label in item.get(field, [])])
+    if visual_labels:
+        bridges.append({'name': 'your uploaded inspirations', 'entity_id': None,
+                        'image_ids': list(observations), 'labels': visual_labels,
+                        'excluded': [], 'source': 'references'})
     for row in feedback:
         if not row.fashion_inspiration or str(row.entity_id) in rejected: continue
         selected = [observations[id] for id in (row.reference_image_ids or []) if id in observations]
@@ -264,7 +273,7 @@ def score_product(row, wanted, bridges, brands, corrections, stated):
     score = min(score, 26)
     if connections:
         connection = max(connections, key=lambda link: len(link['matched_attributes']))
-        source = 'the fashion note you saved for' if connection.get('source') == 'note' else 'the looks you linked to'
+        source = 'the fashion note you saved for' if connection.get('source') == 'note' else ('the visual analysis of' if connection.get('source') == 'references' else 'the looks you linked to')
         why.insert(0, f"Matches {', '.join(connection['matched_attributes'][:2])} in {source} {connection['name']}")
     brand = brands.get(key(row['brand']))
     if brand:

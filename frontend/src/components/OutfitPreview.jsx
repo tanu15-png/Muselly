@@ -21,10 +21,11 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
     finally { feedbackLock.current = false; setSavingFeedback(false); }
   }
   const [pieces, setPieces] = useState([]);
+  const [catalogPieces, setCatalogPieces] = useState([]);
   const [activity, setActivity] = useState('');
   async function findPieces() {
     setBusy(true); setError(''); setActivity('Finding outfit pieces...');
-    try { const data = await apiRequest(`/api/outfits/${selected.id}/similar`, { method: 'POST', expectedOwner: ownerId }); setPieces(data.queries); }
+    try { const data = await apiRequest(`/api/outfits/${selected.id}/similar`, { method: 'POST', expectedOwner: ownerId }); setPieces(data.queries); setCatalogPieces(data.pieces || []); }
     catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
   }
@@ -41,7 +42,7 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
     try {
       const data = await apiRequest('/api/outfits', { expectedOwner: ownerId, method: 'POST', timeoutMs: 180000,
         body: { message: correction ? change : query, ...(correction ? { parent_id: selected.id } : {}) } });
-      setItems(previous => [data.outfit, ...previous]); setSelected(data.outfit); setPieces([]); setQuota(data); setChange('');
+      setItems(previous => [data.outfit, ...previous]); setSelected(data.outfit); setPieces([]); setCatalogPieces([]); setQuota(data); setChange('');
     } catch (failure) { setError(failure.message); }
     finally { lock.current = false; setBusy(false); }
   }
@@ -52,7 +53,7 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
     {busy && <p role="status">{activity}</p>}
     {error && <p role="alert">{error}</p>}
     {selected && <>
-      <p>AI outfit inspiration · similar pieces may differ</p>
+      <p>AI outfit inspiration · based on real catalog pieces; rendering may differ</p>
       <img src={`data:${selected.mime};base64,${selected.image}`} alt="Generated outfit inspiration"  />
       <div className="outfit-product-feedback">
         <button type="button" disabled={savingFeedback || busy} aria-pressed={selected.feedback?.choice === 'like'} onClick={() => vote(selected.feedback?.choice === 'like' ? 'clear' : 'like')}>I like this</button>
@@ -73,8 +74,12 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
         <Button disabled={savingFeedback || busy || exhausted || change.trim().length < 2}>Revise image</Button>
       </form>
       <Button variant="secondary" disabled={savingFeedback || busy} onClick={findPieces}>Find pieces to shop</Button>
+      {catalogPieces.map(piece => <article key={piece.product.product_id}>
+        <a href={piece.product.product_url} target="_blank" rel="noopener noreferrer">{piece.product.name} - INR {piece.product.price} at {piece.product.retailer}</a>
+      </article>)}
+      {selected.reference_count > 0 && <small>{selected.reference_count} uploaded inspirations used</small>}
       {pieces.map(piece => <button type="button" key={piece} onClick={() => onSearch(piece)}>{piece}</button>)}
-      {items.length > 1 && <select disabled={savingFeedback || busy} aria-label="Saved outfit previews" value={selected.id} onChange={event => { setSelected(items.find(item => item.id === event.target.value)); setPieces([]); }}>{items.map((item, index) => <option key={item.id} value={item.id}>Outfit {items.length - index}</option>)}</select>}
+      {items.length > 1 && <select disabled={savingFeedback || busy} aria-label="Saved outfit previews" value={selected.id} onChange={event => { setSelected(items.find(item => item.id === event.target.value)); setPieces([]); setCatalogPieces([]); }}>{items.map((item, index) => <option key={item.id} value={item.id}>Outfit {items.length - index}</option>)}</select>}
     </>}
   </section>;
 }
