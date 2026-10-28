@@ -53,7 +53,7 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
     {busy && <p role="status">{activity}</p>}
     {error && <p role="alert">{error}</p>}
     {selected && <>
-      <p>AI outfit inspiration · based on real catalog pieces; rendering may differ</p>
+      <p>{selected.generation_mode === 'inspiration' ? 'AI inspiration only - no complete catalog match. Similar-product searches may return no results.' : 'AI outfit inspiration - based on real catalog pieces; rendering may differ'}</p>
       <img src={`data:${selected.mime};base64,${selected.image}`} alt="Generated outfit inspiration"  />
       <div className="outfit-product-feedback">
         <button type="button" disabled={savingFeedback || busy} aria-pressed={selected.feedback?.choice === 'like'} onClick={() => vote(selected.feedback?.choice === 'like' ? 'clear' : 'like')}>I like this</button>

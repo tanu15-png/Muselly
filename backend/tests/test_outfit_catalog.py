@@ -22,11 +22,17 @@ def test_catalog_plan_preserves_explicit_budget_and_uses_ranked_products(monkeyp
     assert '_score' not in result[0]['product']
 
 
-def test_no_catalog_matches_blocks_generation(monkeypatch):
+def test_no_catalog_matches_allows_inspiration(monkeypatch):
     monkeypatch.setattr(shopping_agent, 'model_json', lambda *a: outfits.OutfitPlan(queries=['dress under 100']))
     monkeypatch.setattr(outfits.shop, 'catalog', lambda r: [])
     monkeypatch.setattr(outfits.shop, 'rank_catalog', lambda *a: [])
     db = MagicMock(); db.scalars.return_value = []
-    with pytest.raises(HTTPException) as failure:
-        outfits.catalog_outfit(None, db, SimpleNamespace(id='user'), 'dress under 100', None, [], {}, [], [])
-    assert failure.value.status_code == 422
+    result = outfits.catalog_outfit(None, db, SimpleNamespace(id='user'), 'dress under 100', None, [], {}, [], [])
+    assert result == []
+    assert 'INSPIRATION MODE' in outfits.catalog_instruction(result)
+    assert 'Do not claim' in outfits.catalog_instruction(result)
+
+
+def test_available_products_use_catalog_instruction():
+    assert 'CATALOG GROUNDING' in outfits.catalog_instruction([{'product': {}}])
+    assert 'INSPIRATION MODE' not in outfits.catalog_instruction([{'product': {}}])

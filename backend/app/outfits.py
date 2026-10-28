@@ -39,7 +39,7 @@ def catalog_outfit(request, db, user, message, parent, bridges, brands, stated, 
         'Each query describes one garment category with only explicitly requested hard attributes, budget and exclusions. '
         'Do not turn inferred taste into mandatory filters. No accessories or footwear.',
         {'request': combined, 'fashion_context': bridges, 'preferences': stated, 'avoid': avoided})
-    if not plan: raise HTTPException(503, 'Outfit planning is unavailable. Please retry.')
+    if not plan: return []  # Image generation can still provide personal inspiration.
     rows = shop.catalog(request)
     corrections = [SimpleNamespace(url=r.url, kind=r.kind, product=r.product) for r in db.scalars(
         select(ProductFeedback).where(ProductFeedback.user_id == user.id))]
@@ -47,20 +47,28 @@ def catalog_outfit(request, db, user, message, parent, bridges, brands, stated, 
     explicit = shop.intent(combined)
     for query in plan.queries:
         wanted = shop.intent(query)
-        if not wanted['categories']: raise HTTPException(422, 'Please specify the garments you want to wear.')
+        if not wanted['categories']: return []
         for field in ('min_price', 'max_price'):
             if explicit[field] is not None: wanted[field] = explicit[field]
         wanted['excluded'] = sorted(set(wanted['excluded'] + avoided + explicit['excluded']))
         ranked = shop.rank_catalog(rows, wanted, corrections, bridges, brands, stated)
-        if not ranked: raise HTTPException(422, 'The catalog has no suitable pieces for this outfit. Try another garment or budget; no image was charged.')
+        if not ranked: return []
         item = dict(ranked[0]); item.pop('_score', None)
         selected.append({'query': query, 'product': item})
     categories = {piece['product']['category'] for piece in selected}
     if not categories.intersection({'Dresses', 'Co-Ords', 'Kurta Sets'}) and not (
         categories.intersection({'Tops', 'Shirts', 'Tshirts', 'Sweaters', 'Kurtas'}) and
         categories.intersection({'Trousers', 'Jeans', 'Skirts', 'Shorts'})):
-        raise HTTPException(422, 'Could not find a complete outfit in the catalog. Try a dress or a top and trousers.')
+        return []
     return selected
+
+def catalog_instruction(pieces):
+    if pieces:
+        return ('CATALOG GROUNDING: depict only the supplied catalog_pieces; preserve their colors, shapes and patterns. '
+                'Do not invent additional garments. Use uploaded inspirations to guide styling within these catalog constraints. ')
+    return ('INSPIRATION MODE: no complete catalog outfit was found. Create a complete outfit from the request, '
+            'uploaded references, confirmed cultural fashion connections and feedback. '
+            'Do not claim any garment is available to purchase or within a verified price. ')
 
 class OutfitFeedback(BaseModel):
     choice: Literal['like', 'dislike', 'clear']
@@ -173,12 +181,11 @@ def generate(body: Generate, request: Request, user: AuthUser = Depends(get_curr
                  'confirmed_fashion_connections': bridges, 'preferences': stated, 'avoid': avoided,
                  'qloo_brand_affinities': brands, 'outfit_feedback': outfit_choices,
                  'questionnaire': answers, 'catalog_pieces': pieces}
-        parts = [{'text': 'Create a realistic full-length adult fashion model wearing the selected catalog garments, on a plain neutral studio background. '
+        parts = [{'text': 'Create a realistic full-length adult fashion model wearing a complete outfit, on a plain neutral studio background. '
                   'Clothing must be fully visible, realistically fitted and textured. No scenery, furniture, text, '
                   'cups, bags, jewelry or other props. Keep any necessary footwear simple and visually unobtrusive. '
-                  'CATALOG GROUNDING: depict only the supplied catalog_pieces; preserve their described colors, shapes and patterns. '
-                  'Do not invent additional garments. Use uploaded inspirations to guide styling within these catalog constraints. '
-                  'For revisions retain the same model and pose where possible; change garments only as requested and supported by catalog_pieces. '
+                  + catalog_instruction(pieces) +
+                  'For revisions retain the same model and pose where possible; follow the latest requested changes. '
                   'Follow the current request and corrections first. '
                   'Use confirmed fashion connections and preferences; Qloo affinities provide secondary styling context. '
                   'Do not infer costumes from cultural names. No labels, prices or invented availability. '
@@ -207,6 +214,7 @@ def generate(body: Generate, request: Request, user: AuthUser = Depends(get_curr
         payload = {'image': picture['data'], 'mime': picture['mimeType'], 'description': description,
                    'brief': (str(parent.get('brief', '')) + '; ' if parent else '') + body.message,
                    'qloo_status': status, 'qloo_brands': len(brands), 'catalog_pieces': pieces,
+                   'generation_mode': 'catalog' if pieces else 'inspiration',
                    'reference_count': len(references)}
         oid = str(uuid4())
         db.execute(text('INSERT INTO muselly_outfits (id,user_id,payload,created_at) VALUES (:id,:u,:p,:t)'),
