@@ -62,7 +62,7 @@ export default function OutfitPreview({ ownerId, query, onSearch }) {
         <select id="outfit-feedback-reason" disabled={savingFeedback || busy} value={selected.feedback.reason || ''} onChange={event => vote(selected.feedback.choice, event.target.value || null)}>
           <option value="">No specific reason</option><option value="color">Color</option><option value="shape">Shape</option><option value="overall style">Overall style</option>
         </select>
-        <small role="status">{savingFeedback ? 'Saving…' : 'Saved · helps shape your next outfit'}</small>
+        <small role="status">{savingFeedback ? 'Savingâ€¦' : 'Saved Â· helps shape your next outfit'}</small>
         <button type="button" disabled={savingFeedback || busy} onClick={() => vote('clear')}>Clear choice</button>
       </div>}
       <p><small>{selected.qloo_brands} Qloo-connected brands considered{selected.qloo_status !== 'ready' ? ' Â· limited Qloo context' : ''}</small></p>
